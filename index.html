@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерактивный Архив v1.0</title>
+    <title>Интерактивный Архив v1.1</title>
     <style>
         :root {
             --primary: #007bff;
@@ -13,7 +13,6 @@
             --neon: transparent;
         }
 
-        /* РЕЖИМ RUSLAN (ЧЕРНЫЙ) */
         body.ruslan-mode {
             --bg: #0a0a0a;
             --card-bg: #1a1a1a;
@@ -25,14 +24,12 @@
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 20px; color: var(--text); transition: all 0.5s ease; }
         .container { width: 100%; max-width: 700px; background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 1px solid var(--neon); }
 
-        /* Поиск */
         .search-container { margin-bottom: 20px; width: 100%; }
         #search-input {
             width: 100%; padding: 12px 15px; border: 2px solid #ddd; border-radius: 10px;
             background: var(--card-bg); color: var(--text); font-size: 16px; outline: none; transition: 0.3s; box-sizing: border-box;
         }
 
-        /* Навигация */
         .main-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 12px; }
         .main-btn { padding: 10px 25px; cursor: pointer; border: none; background: none; font-weight: bold; border-radius: 8px; color: var(--text); }
         .main-btn.active { background: var(--primary); color: white; box-shadow: var(--neon); }
@@ -41,7 +38,6 @@
         .tab-btn { padding: 6px 12px; cursor: pointer; border: none; background: rgba(0,0,0,0.05); border-radius: 6px; color: var(--text); white-space: nowrap; }
         .tab-btn.active { background: #6c757d; color: white; }
 
-        /* Контент и Анимация */
         .page, .content-section { display: none; }
         .page.active, .content-section.active { display: block; }
 
@@ -54,11 +50,9 @@
         .quote-text { font-style: italic; font-size: 1.1em; border-left: 4px solid var(--primary); padding-left: 15px; display: block; margin-bottom: 10px; }
         .author { text-align: right; display: block; font-weight: bold; }
 
-        /* События */
         .event-header { display: flex; justify-content: space-between; align-items: center; }
         .details-text { display: none; margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 8px; border: 1px dashed var(--primary); font-size: 0.95em; line-height: 1.5; }
 
-        /* Достижения */
         .achievement {
             position: fixed; top: 20px; right: -300px; background: #333; color: #fff; padding: 15px; 
             border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.5s; z-index: 1000;
@@ -66,7 +60,6 @@
         }
         .achievement.show { right: 20px; }
 
-        /* Секретный Терминал */
         #terminal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #000; color: #00ff41; padding: 20px; border-radius: 10px;
@@ -74,11 +67,9 @@
         }
         #terminal input { background: transparent; border: none; color: #00ff41; outline: none; width: 100%; font-family: monospace; border-bottom: 1px solid #00ff41; }
 
-        /* Кнопки действия */
         .action-btn { background: var(--primary); border: none; padding: 8px 15px; border-radius: 5px; color: white; cursor: pointer; margin-top: 10px; font-size: 0.85em; transition: 0.2s; }
         .share-btn { background: rgba(0,0,0,0.1); color: var(--text); margin-left: 5px; }
 
-        /* Уведомление о копировании */
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 20px; display: none; z-index: 3000; }
     </style>
 </head>
@@ -125,7 +116,6 @@
                     <span class="quote-text">«Че за масюля на мне»</span>
                     <span class="author">— Артем Великий</span>
                     <div style="font-size: 0.8em; color: #d9534f; margin-top:10px;">Не используется: Забыли про нее</div>
-                    <button class="action-btn share-btn" onclick="copyQuote(this)">Поделиться 📋</button>
                 </div>
             </div>
         </div>
@@ -136,23 +126,38 @@
                 <span class="author">— Серго Мерго</span>
                 <button class="action-btn share-btn" onclick="copyQuote(this)">Поделиться 📋</button>
             </div>
+            <div class="card">
+                <span class="quote-text">«Коля выйди Коля выйди»</span>
+                <span class="author">— Серго Мерго</span>
+                <button class="action-btn share-btn" onclick="copyQuote(this)">Поделиться 📋</button>
+            </div>
+            <div class="card">
+                <span class="quote-text">«Украинцы»</span>
+                <span class="author">— Серго Мерго</span>
+                <button class="action-btn share-btn" onclick="copyQuote(this)">Поделиться 📋</button>
+            </div>
+            <div class="card">
+                <span class="quote-text">«Сволочи»</span>
+                <span class="author">— Серго Мерго</span>
+                <button class="action-btn share-btn" onclick="copyQuote(this)">Поделиться 📋</button>
+            </div>
         </div>
 
         <div id="terminator-quotes" class="content-section">
-            <p style="text-align: center; opacity: 0.5;">Цитат терминатора пока нет.</p>
+            <p style="text-align: center; opacity: 0.5;">Цитат пока нет.</p>
         </div>
 
         <div id="all-quotes" class="content-section">
             <div class="card">
-                <span class="quote-text">«3 целых Руслан десятых»</span>
-                <span class="author">— Артем Великий</span>
+                <span class="quote-text">«Танк выглядывает»</span>
+                <span class="author">— Вова вел. Артем вел.</span>
                 <button class="action-btn share-btn" onclick="copyQuote(this)">Поделиться 📋</button>
             </div>
-            <div class="card">
-                <span class="quote-text">«Открывайте слушайте»</span>
-                <span class="author">— Серго Мерго</span>
-                <button class="action-btn share-btn" onclick="copyQuote(this)">Поделиться 📋</button>
-            </div>
+            <div class="card"><span class="quote-text">«3 целых Руслан десятых»</span><span class="author">— Артем Великий</span></div>
+            <div class="card"><span class="quote-text">«Открывайте слушайте»</span><span class="author">— Серго Мерго</span></div>
+            <div class="card"><span class="quote-text">«Коля выйди Коля выйди»</span><span class="author">— Серго Мерго</span></div>
+            <div class="card"><span class="quote-text">«Украинцы»</span><span class="author">— Серго Мерго</span></div>
+            <div class="card"><span class="quote-text">«Сволочи»</span><span class="author">— Серго Мерго</span></div>
         </div>
     </div>
 
@@ -165,7 +170,16 @@
         </div>
 
         <div id="ruslan-events" class="content-section active">
-            <p style="text-align: center; opacity: 0.5;">Событий нет.</p>
+            <div class="card">
+                <div class="event-header">
+                    <strong>Пистолет в кобуру</strong>
+                    <small>??.01.26</small>
+                </div>
+                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
+                <div class="details-text">
+                    В один хороший день Руслан сидел и когда услышал звонок сразу спрятал телефон в карман и после один человек под именем Вова велосипед придумал "Пистолет в кобуру". <br><strong>Автор: Вова велосипед</strong>
+                </div>
+            </div>
         </div>
 
         <div id="sergo-events" class="content-section">
@@ -175,9 +189,7 @@
                     <small>27.02.26 | 9:35</small>
                 </div>
                 <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
-                <div class="details-text">
-                    В 9:35 был произведен арт обстрел Серго мерго. Пострадал 1 человек (Серго мерго). В качестве снарядов была кожура от мандаринов.
-                </div>
+                <div class="details-text">В 9:35 был произведен арт обстрел Серго мерго. Пострадал 1 человек (Серго мерго). В качестве снарядов была кожура от мандаринов.</div>
             </div>
         </div>
 
@@ -185,26 +197,17 @@
             <div class="card">
                 <div class="event-header">
                     <strong>Пощечина Терминатора</strong>
-                    <small>??.??.?? | ??:??</small>
+                    <small>??.??.??</small>
                 </div>
                 <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
-                <div class="details-text">
-                    ??? ДЕНЬ,МЕСЯЦ,ГОД. Андрей терминатор встал со своего стула и будучи злым дал пощечину Савелию и он ударился об стену.
-                </div>
+                <div class="details-text">??? ДЕНЬ,МЕСЯЦ,ГОД. Андрей терминатор встал со своего стула и будучи злым дал пощечину Савелию и он ударился об стену.</div>
             </div>
         </div>
 
         <div id="all-events" class="content-section">
-            <div class="card">
-                <strong>Арт обстрел Серго мерго</strong>
-                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
-                <div class="details-text">В 9:35 был произведен арт обстрел Серго мерго...</div>
-            </div>
-            <div class="card">
-                <strong>Пощечина Терминатора</strong>
-                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
-                <div class="details-text">??? ДЕНЬ,МЕСЯЦ,ГОД. Андрей терминатор встал со своего стула и будучи злым дал пощечину Савелию и он ударился об стену.</div>
-            </div>
+            <div class="card"><strong>Пистолет в кобуру</strong> <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один хороший день Руслан сидел и...</div></div>
+            <div class="card"><strong>Арт обстрел Серго мерго</strong> <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button></div>
+            <div class="card"><strong>Пощечина Терминатора</strong> <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button></div>
         </div>
     </div>
 </div>
