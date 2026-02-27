@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивный Архив Pro</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --text: #333;
+            --neon: transparent;
+        }
+
+        /* РЕЖИМ RUSLAN (ЧЕРНЫЙ) */
+        body.ruslan-mode {
+            --bg: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --text: #00ff41;
+            --primary: #00ff41;
+            --neon: 0 0 10px #00ff41;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 20px; color: var(--text); transition: all 0.5s ease; }
+        .container { width: 100%; max-width: 700px; background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 1px solid var(--neon); }
+
+        /* Поиск */
+        .search-container { margin-bottom: 20px; width: 100%; }
+        #search-input {
+            width: 100%; padding: 12px 15px; border: 2px solid #ddd; border-radius: 10px;
+            background: var(--card-bg); color: var(--text); font-size: 16px; outline: none; transition: 0.3s; box-sizing: border-box;
+        }
+
+        /* Навигация */
+        .main-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 12px; }
+        .main-btn { padding: 10px 25px; cursor: pointer; border: none; background: none; font-weight: bold; border-radius: 8px; color: var(--text); }
+        .main-btn.active { background: var(--primary); color: white; box-shadow: var(--neon); }
+
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .tab-btn { padding: 6px 12px; cursor: pointer; border: none; background: rgba(0,0,0,0.05); border-radius: 6px; color: var(--text); }
+        .tab-btn.active { background: #6c757d; color: white; }
+
+        /* Контент и Анимация */
+        .page, .content-section { display: none; }
+        .page.active, .content-section.active { display: block; }
+
+        .card { 
+            background: var(--card-bg); border: 1px solid rgba(0,0,0,0.1); padding: 20px; margin-bottom: 15px; border-radius: 12px;
+            animation: slideUp 0.5s ease forwards; opacity: 0; position: relative;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .quote-text { font-style: italic; font-size: 1.1em; border-left: 4px solid var(--primary); padding-left: 15px; display: block; margin-bottom: 10px; }
+        .author { text-align: right; display: block; font-weight: bold; }
+        .reason { font-size: 0.8em; color: #d9534f; margin-top: 10px; font-weight: bold; }
+
+        /* События */
+        .event-header { display: flex; justify-content: space-between; align-items: center; }
+        .details-text { display: none; margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 8px; border: 1px dashed var(--primary); font-size: 0.95em; line-height: 1.5; }
+
+        /* Достижения */
+        .achievement {
+            position: fixed; top: 20px; right: -300px; background: #333; color: #fff; padding: 15px; 
+            border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.5s; z-index: 1000;
+            border-left: 5px solid gold;
+        }
+        .achievement.show { right: 20px; }
+
+        /* Секретный Терминал */
+        #terminal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #000; color: #00ff41; padding: 20px; border-radius: 10px;
+            width: 300px; display: none; z-index: 2000; box-shadow: 0 0 50px #000;
+        }
+        #terminal input { background: transparent; border: none; color: #00ff41; outline: none; width: 100%; font-family: monospace; border-bottom: 1px solid #00ff41; }
+
+        /* Кнопки действия */
+        .action-btn { background: var(--primary); border: none; padding: 8px 15px; border-radius: 5px; color: white; cursor: pointer; margin-top: 10px; font-size: 0.85em; transition: 0.2s; }
+        .action-btn:hover { opacity: 0.8; }
+        .share-btn { background: rgba(0,0,0,0.1); color: var(--text); margin-left: 5px; }
+
+        /* Уведомление о копировании */
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 20px; display: none; z-index: 3000; }
+    </style>
+</head>
+<body id="main-body">
+
+<div id="copy-toast" class="toast">Скопировано в буфер!</div>
+
+<div id="achievement-box" class="achievement">
+    <strong id="ach-title">Достижение!</strong><br>
+    <span id="ach-desc">Текст достижения</span>
+</div>
+
+<div id="terminal">
+    <div>SYSTEM LOGIN: ACCESS REQUIRED</div>
+    <input type="text" id="terminal-input" placeholder="Введите код...">
+</div>
+
+<div class="container">
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Поиск цитат..." onkeyup="filterQuotes()">
+    </div>
+
+    <div class="main-nav">
+        <button class="main-btn active" onclick="showPage('quotes-page')">Цитаты</button>
+        <button class="main-btn" onclick="showPage('events-page')">События</button>
+    </div>
+
+    <div id="quotes-page" class="page active">
+        <div class="sub-tabs">
+            <button class="tab-btn active" onclick="openSubTab('ruslan', 'quotes')">О Руслане</button>
+            <button class="tab-btn" onclick="openSubTab('sergo', 'quotes')">Серго Мерго</button>
+            <button class="tab-btn" onclick="openSubTab('all', 'quotes')">Все</button>
+        </div>
+
+        <div id="ruslan-quotes" class="content-section active">
+            <div class="card">
+                <span class="quote-text">«3 целых Руслан десятых»</span>
+                <span class="author">— Артем Великий</span>
+                <button class="action-btn share-btn" onclick="copyQuote(this)">Поделиться 📋</button>
+            </div>
+            <div id="secret-quote" style="display: none;">
+                <div class="card" style="border: 2px dashed #d9534f;">
+                    <span class="quote-text">«Че за масюля на мне»</span>
+                    <span class="author">— Артем Великий</span>
+                    <div class="reason">Не используется по причине: Забыли про нее</div>
+                    <button class="action-btn share-btn" onclick="copyQuote(this)">Поделиться 📋</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="sergo-quotes" class="content-section">
+            <p style="text-align: center; opacity: 0.5;">Тут пока нет цитат...</p>
+        </div>
+
+        <div id="all-quotes" class="content-section">
+            <div class="card">
+                <span class="quote-text">«3 целых Руслан десятых»</span>
+                <span class="author">— Артем Великий</span>
+                <button class="action-btn share-btn" onclick="copyQuote(this)">Поделиться 📋</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="events-page" class="page">
+        <div class="sub-tabs">
+            <button class="tab-btn active" onclick="openSubTab('ruslan', 'events')">О Руслане</button>
+            <button class="tab-btn" onclick="openSubTab('sergo', 'events')">Серго Мерго</button>
+            <button class="tab-btn" onclick="openSubTab('all', 'events')">Все</button>
+        </div>
+
+        <div id="ruslan-events" class="content-section active">
+            <p style="text-align: center; opacity: 0.5;">Событий не зафиксировано.</p>
+        </div>
+
+        <div id="sergo-events" class="content-section">
+            <div class="card">
+                <div class="event-header">
+                    <strong>Арт обстрел Серго мерго</strong>
+                    <small>27.02.26 | 9:35</small>
+                </div>
+                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
+                <div class="details-text">
+                    В 9:35 был произведен арт обстрел Серго мерго. Пострадал 1 человек (Серго мерго). В качестве снарядов была кожура от мандаринов.
+                </div>
+            </div>
+        </div>
+
+        <div id="all-events" class="content-section">
+            <div class="card">
+                <div class="event-header">
+                    <strong>Арт обстрел Серго мерго</strong>
+                    <small>27.02.26 | 9:35</small>
+                </div>
+                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
+                <div class="details-text">
+                    В 9:35 был произведен арт обстрел Серго мерго. Пострадал 1 человек (Серго мерго). В качестве снарядов была кожура от мандаринов.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ВКЛАДКИ
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function openSubTab(category, type) {
+        const parentPage = document.getElementById(type + '-page');
+        parentPage.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        parentPage.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(category + '-' + type).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // ПОИСК
+    function filterQuotes() {
+        let input = document.getElementById('search-input').value.toLowerCase();
+        let cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.style.display = card.innerText.toLowerCase().includes(input) ? "block" : "none";
+        });
+    }
+
+    // ПОДРОБНЕЕ (СОБЫТИЯ)
+    function toggleDetails(btn) {
+        const text = btn.nextElementSibling;
+        if (text.style.display === "block") {
+            text.style.display = "none";
+            btn.innerText = "Подробнее";
+        } else {
+            text.style.display = "block";
+            btn.innerText = "Скрыть";
+        }
+    }
+
+    // ПОДЕЛИТЬСЯ (КОПИРОВАНИЕ)
+    function copyQuote(btn) {
+        const card = btn.parentElement;
+        const text = card.querySelector('.quote-text').innerText;
+        const author = card.querySelector('.author').innerText;
+        const fullText = `${text} ${author} (из Архива)`;
+
+        navigator.clipboard.writeText(fullText).then(() => {
+            const toast = document.getElementById('copy-toast');
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        });
+    }
+
+    // ДОСТИЖЕНИЯ
+    function showAchievement(title, desc) {
+        const box = document.getElementById('achievement-box');
+        document.getElementById('ach-title').innerText = title;
+        document.getElementById('ach-desc').innerText = desc;
+        box.classList.add('show');
+        setTimeout(() => box.classList.remove('show'), 4000);
+    }
+
+    // ПАСХАЛКИ И ТЕРМИНАЛ
+    let keys = "";
+    window.addEventListener('keydown', (e) => {
+        keys += e.key.toLowerCase();
+        if (keys.endsWith("ruslan")) {
+            document.getElementById('main-body').classList.toggle('ruslan-mode');
+            showAchievement("Тёмный рыцарь", "Активирован режим RUSLAN");
+            keys = "";
+        }
+        if (e.key === "~" || e.key === "ё") {
+            const term = document.getElementById('terminal');
+            term.style.display = (term.style.display === "block") ? "none" : "block";
+            document.getElementById('terminal-input').focus();
+        }
+    });
+
+    document.getElementById('terminal-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            if (this.value.toLowerCase() === 'admin') {
+                document.getElementById('secret-quote').style.display = 'block';
+                showAchievement("Хакер", "Удаленные данные восстановлены");
+                document.getElementById('terminal').style.display = 'none';
+                this.value = "";
+            } else {
+                this.value = "";
+                document.getElementById('terminal').style.display = 'none';
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
