@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерактивный Архив v1.5 PRO</title>
+    <title>Интерактивный Архив v2.0 MEGA UPDATE</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -26,36 +26,40 @@
         }
 
         body { 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0;
-            min-height: 100vh;
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 20px; 
-            color: var(--text); 
-            transition: all 0.5s ease;
-            overflow-x: hidden;
+            font-family: 'Segoe UI', sans-serif; margin: 0; min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 20px; color: var(--text); transition: all 0.5s ease; overflow-x: hidden;
         }
 
         /* КАНВАС ДЛЯ ЗВЕЗДНОГО НЕБА */
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: var(--bg); transition: background 0.5s; }
 
-        /* КНОПКА И МОДАЛКА ОБНОВЛЕНИЙ */
-        .update-btn { position: fixed; top: 15px; left: 15px; background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.3s; }
-        .update-btn:hover { transform: scale(1.05); }
-        
+        /* ВЕРХНИЕ ВИДЖЕТЫ И КНОПКИ */
+        .top-left-controls { position: fixed; top: 15px; left: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
+        .control-btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.3s; }
+        .control-btn:hover { transform: scale(1.05); }
+        #owner-btn { background: #d9534f; display: none; }
+
+        .next-update-timer { position: fixed; top: 15px; right: 15px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 15px; border-radius: 10px; font-weight: bold; border: 1px solid var(--primary); z-index: 100; text-align: center; box-shadow: var(--neon); }
+
+        /* МОДАЛЬНЫЕ ОКНА */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
         .modal-content { background: var(--card-bg); padding: 25px; border-radius: 15px; max-width: 500px; width: 90%; color: var(--text); border: 1px solid var(--primary); box-shadow: var(--neon); position: relative; }
         .modal-close { position: absolute; top: 10px; right: 15px; background: transparent; border: none; font-size: 1.5em; cursor: pointer; color: var(--text); }
-        .modal-content ul { padding-left: 20px; line-height: 1.6; }
+        
+        /* ЧАТ */
+        .chat-widget { position: fixed; bottom: 20px; right: 20px; width: 300px; background: var(--card-bg); border: 1px solid var(--primary); border-radius: 10px 10px 0 0; z-index: 2000; box-shadow: var(--neon); display: flex; flex-direction: column; overflow: hidden; transition: 0.3s; }
+        .chat-header { background: var(--primary); color: white; padding: 10px; font-weight: bold; cursor: pointer; text-align: center; user-select: none; }
+        .chat-body { display: none; flex-direction: column; height: 300px; }
+        .chat-messages { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.9em; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .chat-msg { margin-bottom: 8px; word-wrap: break-word; }
+        .chat-msg strong { color: var(--primary); }
+        .chat-input-area { display: flex; }
+        #chat-input { flex-grow: 1; padding: 10px; border: none; outline: none; background: transparent; color: var(--text); }
+        #chat-send { background: var(--primary); color: white; border: none; padding: 0 15px; cursor: pointer; font-weight: bold; }
 
-        .container { 
-            width: 100%; max-width: 700px; background: var(--card-bg); padding: 30px; border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 1px solid var(--neon); backdrop-filter: blur(5px); 
-            margin-top: 40px;
-        }
-
+        /* ОСНОВНОЙ КОНТЕНТ */
+        .container { width: 100%; max-width: 700px; background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 1px solid var(--neon); backdrop-filter: blur(5px); margin-top: 60px; margin-bottom: 80px; }
         .stats-header { text-align: center; font-size: 0.9em; color: #888; margin-bottom: 15px; font-weight: bold; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; }
         .search-container { margin-bottom: 20px; width: 100%; }
         #search-input { width: 100%; padding: 12px 15px; border: 2px solid #ddd; border-radius: 10px; background: white; color: #333; font-size: 16px; outline: none; transition: 0.3s; box-sizing: border-box; }
@@ -71,13 +75,16 @@
         .page, .content-section { display: none; }
         .page.active, .content-section.active { display: block; }
 
-        .card { background: white; border: 1px solid rgba(0,0,0,0.1); padding: 20px; margin-bottom: 15px; border-radius: 12px; animation: slideUp 0.5s ease forwards; opacity: 0; position: relative; color: #333; }
+        .card { background: white; border: 1px solid rgba(0,0,0,0.1); padding: 20px; margin-bottom: 15px; border-radius: 12px; animation: slideUp 0.5s ease forwards; opacity: 0; position: relative; color: #333; transition: box-shadow 0.3s; }
         body.ruslan-mode .card { background: #1a1a1a; border-color: #00ff41; color: #00ff41; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* АНИМАЦИЯ ПОДСВЕТКИ ССЫЛКИ */
+        .highlight-quote { animation: pulse-glow 2s ease-out 3; }
+        @keyframes pulse-glow { 0% { box-shadow: 0 0 0 0 var(--primary); } 50% { box-shadow: 0 0 20px 5px var(--primary); } 100% { box-shadow: 0 0 0 0 transparent; } }
+
         .quote-text { font-style: italic; font-size: 1.1em; border-left: 4px solid var(--primary); padding-left: 15px; display: block; margin-bottom: 10px; }
         .author { text-align: right; display: block; font-weight: bold; }
-
         .event-header { display: flex; justify-content: space-between; align-items: center; }
         .details-text { display: none; margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 8px; border: 1px dashed var(--primary); font-size: 0.95em; line-height: 1.5; }
         .time-passed { font-size: 0.85em; color: #d9534f; margin-top: 8px; font-weight: bold; display: block; }
@@ -96,30 +103,69 @@
         .action-btn { background: var(--primary); border: none; padding: 8px 15px; border-radius: 5px; color: white; cursor: pointer; margin-top: 10px; font-size: 0.85em; transition: 0.2s; }
         .share-btn { background: rgba(0,0,0,0.1); color: var(--text); margin-left: 5px; }
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 20px; display: none; z-index: 3000; }
+        
+        textarea { width: 100%; height: 100px; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.05); color: var(--text); border: 1px solid #ccc; font-family: inherit; resize: none; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
 
-<button class="update-btn" onclick="toggleModal(true)">📋 Что нового?</button>
+<div class="top-left-controls">
+    <button class="control-btn" onclick="toggleModal('update-modal')">📋 Что нового?</button>
+    <button class="control-btn" onclick="toggleModal('suggest-modal')">➕ Предложить цитату</button>
+    <button class="control-btn" id="owner-btn" onclick="sendGlobalMessage()">💬 Сообщение всем</button>
+</div>
+
+<div class="next-update-timer">
+    ⏳ До обновы:<br><span id="update-countdown">Считаем...</span>
+</div>
 
 <div class="modal-overlay" id="update-modal">
     <div class="modal-content">
-        <button class="modal-close" onclick="toggleModal(false)">×</button>
-        <h2>Обновление v1.5: Мега Апдейт</h2>
-        <ul>
-            <li>Добавлена эта кнопка "Что нового" для истории обновлений.</li>
-            <li>Добавлен раздел "Предметы" (находится в разработке).</li>
-            <li>Добавлены новые вкладки: Артем В., Вова В., Артем и Вова.</li>
-            <li>Перенос и исправление: "3 целых Руслан десятый" и "Танк выглядывает" распределены по новым вкладкам.</li>
-            <li>Новая цитата Терминатора: "Дебилы малолетние".</li>
-            <li>Новые события: "Андрей в туалете", "Добавление Терминатора в звонок", "Душение на технологии" (с таймером).</li>
+        <button class="modal-close" onclick="toggleModal('update-modal')">×</button>
+        <h2>Обновление v2.0: Глобальная Сеть</h2>
+        <ul style="padding-left: 20px; line-height: 1.6;">
+            <li>Добавлена скрытая предложка цитат (кнопка слева).</li>
+            <li>Добавлен глобальный Live-Чат для общения в углу!</li>
+            <li>Теперь при копировании цитаты копируется и ссылка-телепорт прямо на нее (с подсветкой).</li>
+            <li>Добавлен виджет с таймером до следующей обновы.</li>
+            <li>В терминал добавлены команды: <code>credits</code>, <code>version</code>, и секретная команда <code>???</code>.</li>
+            <li>Глобальная система сообщений (Доступна только избранным).</li>
         </ul>
     </div>
 </div>
 
-<div id="copy-toast" class="toast">Скопировано в буфер!</div>
+<div class="modal-overlay" id="suggest-modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="toggleModal('suggest-modal')">×</button>
+        <h2>Предложить цитату</h2>
+        <p>Напиши цитату и автора. Она будет отправлена на проверку Архивариусу!</p>
+        <textarea id="suggest-text" placeholder="«Цитата...» — Автор"></textarea>
+        <button class="action-btn" style="width: 100%; margin-top: 15px; font-size: 1.1em;" onclick="submitSuggestion()">Отправить</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="global-msg-modal" style="z-index: 5000;">
+    <div class="modal-content" style="border: 2px solid #d9534f; text-align: center;">
+        <button class="modal-close" onclick="toggleModal('global-msg-modal')">×</button>
+        <h2 style="color: #d9534f;">ВНИМАНИЕ!</h2>
+        <p id="global-msg-text" style="font-size: 1.2em; font-weight: bold;"></p>
+    </div>
+</div>
+
+<div class="chat-widget" id="chat-widget">
+    <div class="chat-header" onclick="toggleChat()">💬 Чат Архива (Offline)</div>
+    <div class="chat-body" id="chat-body">
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Введите сообщение...">
+            <button id="chat-send" onclick="sendChatMessage()">➤</button>
+        </div>
+    </div>
+</div>
+
+<div id="copy-toast" class="toast">Ссылка и цитата скопированы!</div>
 <div id="achievement-box" class="achievement">
     <strong id="ach-title">Достижение!</strong><br><span id="ach-desc">Текст достижения</span>
 </div>
@@ -199,13 +245,13 @@
         </div>
 
         <div id="all-quotes" class="content-section">
-            <div class="card" data-quote-id="quote_ruslan_3_10"><span class="quote-text">«3 целых Руслан десятый»</span><span class="author">— Артем Великий</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_ruslan_3_10')">❤️</span><span class="like-count">0</span></div></div>
-            <div class="card" data-quote-id="quote_sergo_1"><span class="quote-text">«Открывайте слушайте»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_1')">❤️</span><span class="like-count">0</span></div></div>
-            <div class="card" data-quote-id="quote_sergo_2"><span class="quote-text">«Коля выйди Коля выйди»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_2')">❤️</span><span class="like-count">0</span></div></div>
-            <div class="card" data-quote-id="quote_sergo_3"><span class="quote-text">«Украинцы»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_3')">❤️</span><span class="like-count">0</span></div></div>
-            <div class="card" data-quote-id="quote_sergo_4"><span class="quote-text">«Сволочи»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_4')">❤️</span><span class="like-count">0</span></div></div>
-            <div class="card" data-quote-id="quote_term_1"><span class="quote-text">«Дебилы малолетние»</span><span class="author">— Андрей.Т</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_term_1')">❤️</span><span class="like-count">0</span></div></div>
-            <div class="card" data-quote-id="quote_vova_tank"><span class="quote-text">«Танк выглядывает»</span><span class="author">— Вова вел. Артем вел.</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_vova_tank')">❤️</span><span class="like-count">0</span></div></div>
+            <div class="card" data-quote-id="quote_ruslan_3_10"><span class="quote-text">«3 целых Руслан десятый»</span><span class="author">— Артем Великий</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_ruslan_3_10')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+            <div class="card" data-quote-id="quote_sergo_1"><span class="quote-text">«Открывайте слушайте»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_1')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+            <div class="card" data-quote-id="quote_sergo_2"><span class="quote-text">«Коля выйди Коля выйди»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_2')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+            <div class="card" data-quote-id="quote_sergo_3"><span class="quote-text">«Украинцы»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_3')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+            <div class="card" data-quote-id="quote_sergo_4"><span class="quote-text">«Сволочи»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_4')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+            <div class="card" data-quote-id="quote_term_1"><span class="quote-text">«Дебилы малолетние»</span><span class="author">— Андрей.Т</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_term_1')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+            <div class="card" data-quote-id="quote_vova_tank"><span class="quote-text">«Танк выглядывает»</span><span class="author">— Вова вел. Артем вел.</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_vova_tank')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
         </div>
     </div>
 
@@ -221,20 +267,11 @@
         </div>
 
         <div id="ruslan-events" class="content-section active">
-            <div class="card">
-                <div class="event-header"><strong>Пистолет в кобуру</strong><small>??.01.26</small></div>
-                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
-                <div class="details-text">В один хороший день Руслан сидел и когда услышал звонок сразу спрятал телефон в карман и после один человек под именем Вова велосипед придумал "Пистолет в кобуру". <br><strong>Автор: Вова велосипед</strong></div>
-            </div>
+            <div class="card"><div class="event-header"><strong>Пистолет в кобуру</strong><small>??.01.26</small></div><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один хороший день Руслан сидел и когда услышал звонок сразу спрятал телефон в карман и после один человек под именем Вова велосипед придумал "Пистолет в кобуру". <br><strong>Автор: Вова велосипед</strong></div></div>
         </div>
 
         <div id="sergo-events" class="content-section">
-            <div class="card">
-                <div class="event-header"><strong>Арт обстрел Серго мерго</strong><small>27.02.26 | 9:35</small></div>
-                <span class="time-passed" data-date="2026-02-27T09:35:00">Загрузка таймера...</span>
-                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
-                <div class="details-text">В 9:35 был произведен арт обстрел Серго мерго. Пострадал 1 человек (Серго мерго). В качестве снарядов была кожура от мандаринов.</div>
-            </div>
+            <div class="card"><div class="event-header"><strong>Арт обстрел Серго мерго</strong><small>27.02.26 | 9:35</small></div><span class="time-passed" data-date="2026-02-27T09:35:00">Загрузка таймера...</span><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В 9:35 был произведен арт обстрел Серго мерго. Пострадал 1 человек (Серго мерго). В качестве снарядов была кожура от мандаринов.</div></div>
         </div>
 
         <div id="terminator-events" class="content-section">
@@ -244,12 +281,10 @@
         </div>
 
         <div id="artem-events" class="content-section">
-            <div class="card"><div class="event-header"><strong>Добавление Терминатора в звонок</strong><small>??.??.2026</small></div><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один день Вова и Артем решили поиграть в Кс2 и когда они случайно отключились Артем случайно добавил в звонок Андрея Терминатора и ему повезло что он быстро не подключился и Артем быстро отключился от звонка и оставив андрея одного.</div></div>
+            <div class="card"><div class="event-header"><strong>Добавление Терминатора в звонок</strong><small>??.??.2026</small></div><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один день Вова и Артем решили поиграть в Кс2...</div></div>
         </div>
 
-        <div id="vova-events" class="content-section">
-            <p style="text-align: center; opacity: 0.5;">Событий пока нет.</p>
-        </div>
+        <div id="vova-events" class="content-section"><p style="text-align: center; opacity: 0.5;">Событий пока нет.</p></div>
 
         <div id="artem-vova-events" class="content-section">
             <div class="card"><div class="event-header"><strong>Андрей в туалете</strong><small>??.??.??</small></div><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один день Артем и Вова решились сходить в самый опасный туалет школы и когда они зашли то увидели как Терминатор Андрей писает и они сбежали едва не выдав себя.<br><strong>Авторы: Артем.В и Вова.В</strong></div></div>
@@ -273,7 +308,7 @@
 
 <script>
     // ==========================================
-    // НАСТРОЙКА FIREBASE (КЛЮЧИ СОХРАНЕНЫ)
+    // 1. НАСТРОЙКА FIREBASE
     // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyCAf9GfgjJSuIC3i-NZq6TH-E3OjYDj5ng",
@@ -286,219 +321,165 @@
     };
 
     let database = null;
+    let loadTime = Date.now(); // Для отслеживания новых сообщений
+    let chatUsername = localStorage.getItem('archive_chat_name') || "Аноним_" + Math.floor(Math.random()*1000);
+
     try {
         firebase.initializeApp(firebaseConfig);
         database = firebase.database();
+        document.querySelector('.chat-header').innerText = "💬 Чат Архива (Live)";
     } catch(e) { console.warn("Firebase ошибка:", e); }
 
     // ==========================================
-    // ЛОГИКА ЗВЕЗДНОГО НЕБА (КАНВАС)
+    // 2. ГЛОБАЛЬНЫЙ ЧАТ
     // ==========================================
-    const canvas = document.getElementById('bg-canvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    const mouse = { x: null, y: null, radius: 100 };
+    function toggleChat() {
+        const body = document.getElementById('chat-body');
+        body.style.display = body.style.display === "flex" ? "none" : "flex";
+        if(body.style.display === "flex") scrollChat();
+    }
 
-    window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
-
-    class Particle {
-        constructor() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 2 + 1;
-            this.baseX = this.x;
-            this.baseY = this.y;
-            this.density = (Math.random() * 30) + 1;
-        }
-        draw() {
-            ctx.fillStyle = document.body.classList.contains('ruslan-mode') ? '#00ff41' : '#007bff';
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.closePath();
-            ctx.fill();
-        }
-        update() {
-            let dx = mouse.x - this.x;
-            let dy = mouse.y - this.y;
-            let distance = Math.sqrt(dx * dx + dy * dy);
-            let forceDirectionX = dx / distance;
-            let forceDirectionY = dy / distance;
-            let maxDistance = mouse.radius;
-            let force = (maxDistance - distance) / maxDistance;
-            let directionX = forceDirectionX * force * this.density;
-            let directionY = forceDirectionY * force * this.density;
-
-            if (distance < mouse.radius) {
-                this.x -= directionX;
-                this.y -= directionY;
-            } else {
-                if (this.x !== this.baseX) { let dx = this.x - this.baseX; this.x -= dx / 10; }
-                if (this.y !== this.baseY) { let dy = this.y - this.baseY; this.y -= dy / 10; }
-            }
+    function sendChatMessage() {
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if(text && database) {
+            database.ref('chat').push({ name: chatUsername, text: text, time: Date.now() });
+            input.value = "";
         }
     }
 
-    function initParticles() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        particles = [];
-        for (let i = 0; i < 100; i++) particles.push(new Particle());
+    document.getElementById('chat-input').addEventListener('keypress', function(e) {
+        if(e.key === 'Enter') sendChatMessage();
+    });
+
+    function scrollChat() {
+        const box = document.getElementById('chat-messages');
+        box.scrollTop = box.scrollHeight;
     }
 
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (let i = 0; i < particles.length; i++) {
-            particles[i].draw();
-            particles[i].update();
-        }
-        connect();
-        requestAnimationFrame(animate);
+    if(database) {
+        database.ref('chat').limitToLast(50).on('child_added', snap => {
+            const data = snap.val();
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-msg';
+            msgDiv.innerHTML = `<strong>${data.name}:</strong> ${data.text}`;
+            document.getElementById('chat-messages').appendChild(msgDiv);
+            scrollChat();
+        });
     }
-
-    function connect() {
-        for (let a = 0; a < particles.length; a++) {
-            for (let b = a; b < particles.length; b++) {
-                let dx = particles[a].x - particles[b].x;
-                let dy = particles[a].y - particles[b].y;
-                let distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance < 150) {
-                    ctx.strokeStyle = document.body.classList.contains('ruslan-mode') ? 'rgba(0, 255, 65, 0.1)' : 'rgba(0, 123, 255, 0.1)';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(particles[a].x, particles[a].y);
-                    ctx.lineTo(particles[b].x, particles[b].y);
-                    ctx.stroke();
-                }
-            }
-        }
-    }
-
-    window.addEventListener('resize', initParticles);
-    initParticles();
-    animate();
 
     // ==========================================
-    // ЛОГИКА ЛАЙКОВ (GLOBAL + LOCAL)
+    // 3. ПРЕДЛОЖКА ЦИТАТ
     // ==========================================
-    function toggleLike(id) {
-        const isLikedLocal = localStorage.getItem('liked_' + id);
-        if (database) {
-            const ref = database.ref('likes/' + id);
-            ref.transaction(c => isLikedLocal ? (localStorage.removeItem('liked_'+id), (c||1)-1) : (localStorage.setItem('liked_'+id, 't'), (c||0)+1));
+    function submitSuggestion() {
+        const text = document.getElementById('suggest-text').value.trim();
+        if(text && database) {
+            database.ref('pending_quotes').push({ text: text, time: Date.now(), user: chatUsername });
+            document.getElementById('suggest-text').value = "";
+            toggleModal('suggest-modal');
+            showAchievement("Отправлено!", "Цитата ушла на проверку.");
         } else {
-            let el = document.querySelector(`[data-quote-id="${id}"] .like-count`);
-            let c = parseInt(el.innerText) || 0;
-            if(isLikedLocal) { localStorage.removeItem('liked_'+id); updateDOM(id, c-1, false); }
-            else { localStorage.setItem('liked_'+id, 't'); updateDOM(id, c+1, true); }
+            alert("Пожалуйста, введите текст!");
         }
     }
 
-    if (database) {
-        database.ref('likes').on('value', s => {
-            const d = s.val() || {};
-            document.querySelectorAll('.card[data-quote-id]').forEach(c => {
-                const id = c.dataset.quoteId;
-                updateDOM(id, d[id] || 0, localStorage.getItem('liked_'+id));
-            });
-        });
-    }
-
-    function updateDOM(id, count, liked) {
-        document.querySelectorAll(`[data-quote-id="${id}"]`).forEach(c => {
-            let countEl = c.querySelector('.like-count');
-            if (countEl) countEl.innerText = count;
-            const btn = c.querySelector('.like-btn');
-            if (btn) { liked ? btn.classList.add('liked') : btn.classList.remove('liked'); }
-        });
-    }
-
     // ==========================================
-    // ИНТЕРФЕЙС, ПОИСК И НАВИГАЦИЯ
+    // 4. ССЫЛКИ-ТЕЛЕПОРТЫ НА ЦИТАТУ
     // ==========================================
-    function showPage(id) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        event.currentTarget.classList.add('active');
-        updateStats();
-    }
-
-    function openSubTab(cat, type) {
-        const p = document.getElementById(type + '-page');
-        p.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-        p.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(cat + '-' + type).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
-
-    function toggleModal(show) {
-        document.getElementById('update-modal').style.display = show ? 'flex' : 'none';
-    }
-
-    function filterQuotes() {
-        let input = document.getElementById('search-input').value.toLowerCase();
-        document.querySelectorAll('.card').forEach(card => {
-            card.style.display = card.innerText.toLowerCase().includes(input) ? "block" : "none";
-        });
-    }
-
-    function toggleDetails(btn) {
-        const t = btn.parentElement.querySelector('.details-text');
-        t.style.display = t.style.display === "block" ? "none" : "block";
-        btn.innerText = t.style.display === "block" ? "Скрыть" : "Подробнее";
-    }
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const qId = urlParams.get('q');
+        
+        if (qId) {
+            // Переключаем на вкладку "Все" в цитатах
+            showPage('quotes-page');
+            openSubTab('all', 'quotes');
+            
+            setTimeout(() => {
+                const target = document.querySelector(`#all-quotes .card[data-quote-id="${qId}"]`);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    target.classList.add('highlight-quote');
+                }
+            }, 500); // задержка для рендера
+        }
+    });
 
     function copyQuote(btn) {
         const card = btn.closest('.card');
         const text = card.querySelector('.quote-text').innerText;
         const author = card.querySelector('.author').innerText;
-        navigator.clipboard.writeText(`${text} ${author} (из Архива)`);
+        const qId = card.getAttribute('data-quote-id');
+        
+        // Генерируем ссылку
+        const link = window.location.origin + window.location.pathname + "?q=" + qId;
+        
+        navigator.clipboard.writeText(`${text} ${author}\nСсылка: ${link}`);
         const toast = document.getElementById('copy-toast');
         toast.style.display = 'block';
-        setTimeout(() => toast.style.display = 'none', 2000);
+        setTimeout(() => toast.style.display = 'none', 3000);
     }
 
-    function showAchievement(title, desc) {
-        const box = document.getElementById('achievement-box');
-        document.getElementById('ach-title').innerText = title;
-        document.getElementById('ach-desc').innerText = desc;
-        box.classList.add('show');
-        setTimeout(() => box.classList.remove('show'), 4000);
-    }
-
-    function updateStats() {
-        // Считаем все уникальные карточки во вкладке "Все" (чтобы избежать дублирования из других вкладок)
-        let q = document.querySelectorAll('#all-quotes .card').length;
-        let e = document.querySelectorAll('#all-events .card').length;
-        document.getElementById('live-stats').innerText = `📊 Всего цитат: ${q} | Событий: ${e}`;
-    }
-
-    // ТАЙМЕР
+    // ==========================================
+    // 5. ТАЙМЕРЫ И ОБНОВЛЕНИЯ
+    // ==========================================
+    // Таймер до Мега-обновы (1 марта 2026, 15:30)
+    const nextUpdateDate = new Date('2026-03-01T15:30:00');
+    
     setInterval(() => {
+        // Таймер до обновы
+        const diffUpd = nextUpdateDate - new Date();
+        const updEl = document.getElementById('update-countdown');
+        if(diffUpd > 0) {
+            const h = Math.floor(diffUpd / 3600000);
+            const m = Math.floor((diffUpd / 60000) % 60);
+            const s = Math.floor((diffUpd / 1000) % 60);
+            updEl.innerText = `${h}ч ${m}м ${s}с`;
+        } else {
+            updEl.innerText = "Обнова уже здесь!";
+        }
+
+        // Таймеры событий
         document.querySelectorAll('.time-passed').forEach(t => {
-            const eventDate = new Date(t.dataset.date);
-            const diff = new Date() - eventDate;
+            const diff = new Date() - new Date(t.dataset.date);
             if (diff > 0) {
                 const d = Math.floor(diff / 86400000);
                 const h = Math.floor((diff / 3600000) % 24);
                 const m = Math.floor((diff / 60000) % 60);
                 const s = Math.floor((diff / 1000) % 60);
                 t.innerText = `⏱ Прошло: ${d}д ${h}ч ${m}м ${s}с`;
-            } else {
-                t.innerText = "⏱ Событие еще не наступило";
             }
         });
     }, 1000);
 
-    // ПАСХАЛКИ И ТЕРМИНАЛ
+    // ==========================================
+    // 6. СЕКРЕТНЫЙ РЕЖИМ OWNER И ГЛОБАЛЬНЫЕ СООБЩЕНИЯ
+    // ==========================================
+    function sendGlobalMessage() {
+        const msg = prompt("Введите сообщение для всех пользователей:");
+        if(msg && database) {
+            database.ref('announcement').set({ text: msg, time: Date.now() });
+        }
+    }
+
+    if(database) {
+        database.ref('announcement').on('value', snap => {
+            const data = snap.val();
+            // Показываем сообщение только если оно было отправлено ПОСЛЕ того, как мы зашли на сайт
+            if(data && data.time > loadTime) {
+                document.getElementById('global-msg-text').innerText = data.text;
+                document.getElementById('global-msg-modal').style.display = 'flex';
+            }
+        });
+    }
+
+    // ==========================================
+    // ТЕРМИНАЛ И ПАСХАЛКИ
+    // ==========================================
     let keys = "";
     window.addEventListener('keydown', e => {
         keys += e.key.toLowerCase();
-        if (keys.endsWith("ruslan")) { 
-            document.body.classList.toggle('ruslan-mode'); 
-            showAchievement("Тёмный рыцарь", "Активирован режим RUSLAN");
-            keys = ""; 
-        }
+        if (keys.endsWith("ruslan")) { document.body.classList.toggle('ruslan-mode'); keys = ""; }
         if (e.key === "~" || e.key === "ё") { 
             const t = document.getElementById('terminal');
             t.style.display = t.style.display === "block" ? "none" : "block";
@@ -508,19 +489,84 @@
 
     document.getElementById('terminal-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-            if (this.value === 'admin') {
+            const val = this.value.toLowerCase();
+            
+            if (val === 'admin') {
                 document.getElementById('secret-quote').style.display = 'block';
                 showAchievement("Хакер", "Удаленные данные восстановлены");
-                // Добавляем секретную цитату в счетчик
-                let q = document.querySelectorAll('#all-quotes .card').length + 1;
-                let ev = document.querySelectorAll('#all-events .card').length;
-                document.getElementById('live-stats').innerText = `📊 Всего цитат: ${q} | Событий: ${ev}`;
+                updateStats();
+            } 
+            else if (val === 'credits') {
+                alert("💻 СОЗДАТЕЛИ АРХИВА:\n- Артем\n- Вова\n- Руслан");
+            } 
+            else if (val === 'version') {
+                alert("⚙️ ТЕКУЩАЯ ВЕРСИЯ:\nv2.0 MEGA UPDATE");
+            } 
+            else if (val === 'owner') {
+                document.getElementById('owner-btn').style.display = 'block';
+                showAchievement("Система", "Доступ [OWNER] Разрешен");
             }
+
             this.value = ""; 
             document.getElementById('terminal').style.display = 'none';
         }
     });
 
+    // ==========================================
+    // ЛОГИКА ЛАЙКОВ И ЗВЕЗДНОЕ НЕБО
+    // ==========================================
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    const mouse = { x: null, y: null, radius: 100 };
+    window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+
+    class Particle {
+        constructor() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height; this.size = Math.random()*2+1; this.baseX = this.x; this.baseY = this.y; this.density = (Math.random()*30)+1; }
+        draw() { ctx.fillStyle = document.body.classList.contains('ruslan-mode') ? '#00ff41' : '#007bff'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.closePath(); ctx.fill(); }
+        update() {
+            let dx = mouse.x - this.x; let dy = mouse.y - this.y; let distance = Math.sqrt(dx*dx + dy*dy);
+            let forceDirectionX = dx/distance; let forceDirectionY = dy/distance; let force = (mouse.radius - distance) / mouse.radius;
+            if (distance < mouse.radius) { this.x -= forceDirectionX * force * this.density; this.y -= forceDirectionY * force * this.density; } 
+            else { if(this.x !== this.baseX) this.x -= (this.x - this.baseX)/10; if(this.y !== this.baseY) this.y -= (this.y - this.baseY)/10; }
+        }
+    }
+    function initParticles() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; for (let i = 0; i < 100; i++) particles.push(new Particle()); }
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particles.length; i++) { particles[i].draw(); particles[i].update(); }
+        for(let a=0; a<particles.length; a++) for(let b=a; b<particles.length; b++) {
+            let dx = particles[a].x - particles[b].x; let dy = particles[a].y - particles[b].y;
+            if(Math.sqrt(dx*dx + dy*dy) < 150) { ctx.strokeStyle = document.body.classList.contains('ruslan-mode') ? 'rgba(0,255,65,0.1)' : 'rgba(0,123,255,0.1)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(particles[a].x, particles[a].y); ctx.lineTo(particles[b].x, particles[b].y); ctx.stroke(); }
+        }
+        requestAnimationFrame(animate);
+    }
+    window.addEventListener('resize', initParticles); initParticles(); animate();
+
+    function toggleLike(id) {
+        const isLikedLocal = localStorage.getItem('liked_' + id);
+        if (database) {
+            database.ref('likes/' + id).transaction(c => isLikedLocal ? (localStorage.removeItem('liked_'+id), (c||1)-1) : (localStorage.setItem('liked_'+id, 't'), (c||0)+1));
+        } else {
+            let c = parseInt(document.querySelector(`[data-quote-id="${id}"] .like-count`).innerText) || 0;
+            if(isLikedLocal) { localStorage.removeItem('liked_'+id); updateDOM(id, c-1, false); }
+            else { localStorage.setItem('liked_'+id, 't'); updateDOM(id, c+1, true); }
+        }
+    }
+
+    if (database) database.ref('likes').on('value', s => { const d = s.val()||{}; document.querySelectorAll('.card[data-quote-id]').forEach(c => { const id = c.dataset.quoteId; updateDOM(id, d[id]||0, localStorage.getItem('liked_'+id)); }); });
+    function updateDOM(id, count, liked) { document.querySelectorAll(`[data-quote-id="${id}"]`).forEach(c => { c.querySelector('.like-count').innerText = count; const btn = c.querySelector('.like-btn'); if(btn) liked ? btn.classList.add('liked') : btn.classList.remove('liked'); }); }
+
+    // ==========================================
+    // ИНТЕРФЕЙС, ПОИСК И НАВИГАЦИЯ
+    // ==========================================
+    function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); updateStats(); }
+    function openSubTab(cat, type) { const p = document.getElementById(type+'-page'); p.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); p.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(cat+'-'+type).classList.add('active'); event.currentTarget.classList.add('active'); }
+    function toggleModal(id) { const el = document.getElementById(id); el.style.display = el.style.display === "flex" ? "none" : "flex"; }
+    function filterQuotes() { let input = document.getElementById('search-input').value.toLowerCase(); document.querySelectorAll('.card').forEach(card => card.style.display = card.innerText.toLowerCase().includes(input) ? "block" : "none"); }
+    function toggleDetails(btn) { const t = btn.parentElement.querySelector('.details-text'); t.style.display = t.style.display === "block" ? "none" : "block"; btn.innerText = t.style.display === "block" ? "Скрыть" : "Подробнее"; }
+    function showAchievement(title, desc) { document.getElementById('ach-title').innerText = title; document.getElementById('ach-desc').innerText = desc; const box = document.getElementById('achievement-box'); box.classList.add('show'); setTimeout(() => box.classList.remove('show'), 4000); }
+    function updateStats() { document.getElementById('live-stats').innerText = `📊 Всего цитат: ${document.querySelectorAll('#all-quotes .card').length} | Событий: ${document.querySelectorAll('#all-events .card').length}`; }
     updateStats();
 </script>
 </body>
