@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерактивный Архив v1.4 PRO</title>
+    <title>Интерактивный Архив v1.4.1 PRO</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -39,26 +39,11 @@
         }
 
         /* КАНВАС ДЛЯ ЗВЕЗДНОГО НЕБА */
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: var(--bg);
-            transition: background 0.5s;
-        }
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: var(--bg); transition: background 0.5s; }
 
         .container { 
-            width: 100%; 
-            max-width: 700px; 
-            background: var(--card-bg); 
-            padding: 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            border: 1px solid var(--neon);
-            backdrop-filter: blur(5px);
+            width: 100%; max-width: 700px; background: var(--card-bg); padding: 30px; border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 1px solid var(--neon); backdrop-filter: blur(5px); 
         }
 
         .stats-header { text-align: center; font-size: 0.9em; color: #888; margin-bottom: 15px; font-weight: bold; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; }
@@ -78,7 +63,6 @@
 
         .card { background: white; border: 1px solid rgba(0,0,0,0.1); padding: 20px; margin-bottom: 15px; border-radius: 12px; animation: slideUp 0.5s ease forwards; opacity: 0; position: relative; color: #333; }
         body.ruslan-mode .card { background: #1a1a1a; border-color: #00ff41; color: #00ff41; }
-        
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .quote-text { font-style: italic; font-size: 1.1em; border-left: 4px solid var(--primary); padding-left: 15px; display: block; margin-bottom: 10px; }
@@ -130,6 +114,7 @@
         <div class="sub-tabs">
             <button class="tab-btn active" onclick="openSubTab('ruslan', 'quotes')">О Руслане</button>
             <button class="tab-btn" onclick="openSubTab('sergo', 'quotes')">Серго Мерго</button>
+            <button class="tab-btn" onclick="openSubTab('terminator', 'quotes')">Андрей Терминатор</button>
             <button class="tab-btn" onclick="openSubTab('all', 'quotes')">Все</button>
         </div>
 
@@ -137,45 +122,63 @@
             <div class="card" data-quote-id="quote_ruslan_3_10">
                 <span class="quote-text">«3 целых Руслан десятых»</span><span class="author">— Артем Великий</span>
                 <div class="like-section">
-                    <span class="like-btn" onclick="toggleLike('quote_ruslan_3_10')">❤️</span>
-                    <span class="like-count">0</span>
+                    <span class="like-btn" onclick="toggleLike('quote_ruslan_3_10')">❤️</span><span class="like-count">0</span>
                     <button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button>
                 </div>
             </div>
             <div id="secret-quote" style="display: none;">
-                <div class="card" data-quote-id="quote_secret_masulya">
+                <div class="card" data-quote-id="quote_secret_masulya" style="border: 2px dashed #d9534f;">
                     <span class="quote-text">«Че за масюля на мне»</span><span class="author">— Артем Великий</span>
-                    <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_secret_masulya')">❤️</span><span class="like-count">0</span></div>
+                    <div style="font-size: 0.8em; color: #d9534f; margin-top:10px;">Не используется: Забыли про нее</div>
+                    <div class="like-section">
+                        <span class="like-btn" onclick="toggleLike('quote_secret_masulya')">❤️</span><span class="like-count">0</span>
+                        <button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div id="sergo-quotes" class="content-section">
-            <div class="card" data-quote-id="quote_sergo_1"><span class="quote-text">«Открывайте слушайте»</span><span class="author">— Серго Мерго</span>
-                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_1')">❤️</span><span class="like-count">0</span></div>
+            <div class="card" data-quote-id="quote_sergo_1">
+                <span class="quote-text">«Открывайте слушайте»</span><span class="author">— Серго Мерго</span>
+                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_1')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
             </div>
-            <div class="card" data-quote-id="quote_sergo_2"><span class="quote-text">«Коля выйди Коля выйди»</span><span class="author">— Серго Мерго</span>
-                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_2')">❤️</span><span class="like-count">0</span></div>
+            <div class="card" data-quote-id="quote_sergo_2">
+                <span class="quote-text">«Коля выйди Коля выйди»</span><span class="author">— Серго Мерго</span>
+                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_2')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
             </div>
-            <div class="card" data-quote-id="quote_sergo_3"><span class="quote-text">«Украинцы»</span><span class="author">— Серго Мерго</span>
-                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_3')">❤️</span><span class="like-count">0</span></div>
+            <div class="card" data-quote-id="quote_sergo_3">
+                <span class="quote-text">«Украинцы»</span><span class="author">— Серго Мерго</span>
+                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_3')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
             </div>
-            <div class="card" data-quote-id="quote_sergo_4"><span class="quote-text">«Сволочи»</span><span class="author">— Серго Мерго</span>
-                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_4')">❤️</span><span class="like-count">0</span></div>
+            <div class="card" data-quote-id="quote_sergo_4">
+                <span class="quote-text">«Сволочи»</span><span class="author">— Серго Мерго</span>
+                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_4')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
             </div>
         </div>
 
+        <div id="terminator-quotes" class="content-section">
+            <p style="text-align: center; opacity: 0.5;">Цитат пока нет.</p>
+        </div>
+
         <div id="all-quotes" class="content-section">
-            <div class="card" data-quote-id="quote_tank"><span class="quote-text">«Танк выглядывает»</span><span class="author">— Вова вел. Артем вел.</span>
-                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_tank')">❤️</span><span class="like-count">0</span></div>
+            <div class="card" data-quote-id="quote_vova_tank">
+                <span class="quote-text">«Танк выглядывает»</span><span class="author">— Вова вел. Артем вел.</span>
+                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_vova_tank')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
             </div>
-            </div>
+            <div class="card" data-quote-id="quote_ruslan_3_10"><span class="quote-text">«3 целых Руслан десятых»</span><span class="author">— Артем Великий</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_ruslan_3_10')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+            <div class="card" data-quote-id="quote_sergo_1"><span class="quote-text">«Открывайте слушайте»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_1')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+            <div class="card" data-quote-id="quote_sergo_2"><span class="quote-text">«Коля выйди Коля выйди»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_2')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+            <div class="card" data-quote-id="quote_sergo_3"><span class="quote-text">«Украинцы»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_3')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+            <div class="card" data-quote-id="quote_sergo_4"><span class="quote-text">«Сволочи»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_4')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+        </div>
     </div>
 
     <div id="events-page" class="page">
         <div class="sub-tabs">
             <button class="tab-btn active" onclick="openSubTab('ruslan', 'events')">О Руслане</button>
             <button class="tab-btn" onclick="openSubTab('sergo', 'events')">Серго Мерго</button>
+            <button class="tab-btn" onclick="openSubTab('terminator', 'events')">Андрей Терминатор</button>
             <button class="tab-btn" onclick="openSubTab('all', 'events')">Все</button>
         </div>
 
@@ -183,7 +186,7 @@
             <div class="card">
                 <div class="event-header"><strong>Пистолет в кобуру</strong><small>??.01.26</small></div>
                 <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
-                <div class="details-text">В один хороший день Руслан сидел и когда услышал звонок сразу спрятал телефон в карман и после один человек под именем Вова велосипед придумал "Пистолет в кобуру". <br><strong>От Вова велосипед</strong></div>
+                <div class="details-text">В один хороший день Руслан сидел и когда услышал звонок сразу спрятал телефон в карман и после один человек под именем Вова велосипед придумал "Пистолет в кобуру". <br><strong>Автор: Вова велосипед</strong></div>
             </div>
         </div>
 
@@ -192,15 +195,35 @@
                 <div class="event-header"><strong>Арт обстрел Серго мерго</strong><small>27.02.26 | 9:35</small></div>
                 <span class="time-passed" data-date="2026-02-27T09:35:00">Загрузка таймера...</span>
                 <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
-                <div class="details-text">В качестве снарядов была кожура от мандаринов. Пострадал Серго мерго.</div>
+                <div class="details-text">В 9:35 был произведен арт обстрел Серго мерго. Пострадал 1 человек (Серго мерго). В качестве снарядов была кожура от мандаринов.</div>
             </div>
+        </div>
+
+        <div id="terminator-events" class="content-section">
+            <div class="card">
+                <div class="event-header"><strong>Пощечина Терминатора</strong><small>??.??.??</small></div>
+                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
+                <div class="details-text">??? ДЕНЬ,МЕСЯЦ,ГОД. Андрей терминатор встал со своего стула и будучи злым дал пощечину Савелию и он ударился об стену.</div>
+            </div>
+        </div>
+
+        <div id="all-events" class="content-section">
+            <div class="card"><strong>Пистолет в кобуру</strong> <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один хороший день Руслан сидел и...</div></div>
+            <div class="card">
+                <strong>Арт обстрел Серго мерго</strong><br>
+                <span class="time-passed" data-date="2026-02-27T09:35:00">Загрузка таймера...</span><br>
+                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
+                <div class="details-text">В 9:35 был произведен арт обстрел Серго мерго...</div>
+            </div>
+            <div class="card"><strong>Пощечина Терминатора</strong> <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">??? ДЕНЬ,МЕСЯЦ,ГОД. Андрей терминатор встал...</div></div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- НАСТРОЙКА FIREBASE ---
-    // ЗАМЕНИ НА СВОИ КЛЮЧИ!
+    // ==========================================
+    // НАСТРОЙКА FIREBASE (КЛЮЧИ ВСТАВЛЕНЫ)
+    // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyCAf9GfgjJSuIC3i-NZq6TH-E3OjYDj5ng",
         authDomain: "citata-edadd.firebaseapp.com",
@@ -215,9 +238,11 @@
     try {
         firebase.initializeApp(firebaseConfig);
         database = firebase.database();
-    } catch(e) { console.warn("Firebase не настроен."); }
+    } catch(e) { console.warn("Firebase ошибка:", e); }
 
-    // --- ЛОГИКА ЗВЕЗДНОГО НЕБА ---
+    // ==========================================
+    // ЛОГИКА ЗВЕЗДНОГО НЕБА (КАНВАС)
+    // ==========================================
     const canvas = document.getElementById('bg-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -256,14 +281,8 @@
                 this.x -= directionX;
                 this.y -= directionY;
             } else {
-                if (this.x !== this.baseX) {
-                    let dx = this.x - this.baseX;
-                    this.x -= dx / 10;
-                }
-                if (this.y !== this.baseY) {
-                    let dy = this.y - this.baseY;
-                    this.y -= dy / 10;
-                }
+                if (this.x !== this.baseX) { let dx = this.x - this.baseX; this.x -= dx / 10; }
+                if (this.y !== this.baseY) { let dy = this.y - this.baseY; this.y -= dy / 10; }
             }
         }
     }
@@ -307,7 +326,9 @@
     initParticles();
     animate();
 
-    // --- ЛОГИКА ЛАЙКОВ ---
+    // ==========================================
+    // ЛОГИКА ЛАЙКОВ (GLOBAL + LOCAL)
+    // ==========================================
     function toggleLike(id) {
         const isLikedLocal = localStorage.getItem('liked_' + id);
         if (database) {
@@ -333,19 +354,22 @@
 
     function updateDOM(id, count, liked) {
         document.querySelectorAll(`[data-quote-id="${id}"]`).forEach(c => {
-            c.querySelector('.like-count').innerText = count;
+            let countEl = c.querySelector('.like-count');
+            if (countEl) countEl.innerText = count;
             const btn = c.querySelector('.like-btn');
-            liked ? btn.classList.add('liked') : btn.classList.remove('liked');
+            if (btn) { liked ? btn.classList.add('liked') : btn.classList.remove('liked'); }
         });
-        updateStats();
     }
 
-    // --- ОБЩАЯ ЛОГИКА ---
+    // ==========================================
+    // ИНТЕРФЕЙС, ПОИСК И НАВИГАЦИЯ
+    // ==========================================
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         event.currentTarget.classList.add('active');
+        updateStats();
     }
 
     function openSubTab(cat, type) {
@@ -356,33 +380,70 @@
         event.currentTarget.classList.add('active');
     }
 
+    function filterQuotes() {
+        let input = document.getElementById('search-input').value.toLowerCase();
+        document.querySelectorAll('.card').forEach(card => {
+            card.style.display = card.innerText.toLowerCase().includes(input) ? "block" : "none";
+        });
+    }
+
     function toggleDetails(btn) {
         const t = btn.parentElement.querySelector('.details-text');
         t.style.display = t.style.display === "block" ? "none" : "block";
         btn.innerText = t.style.display === "block" ? "Скрыть" : "Подробнее";
     }
 
-    function updateStats() {
-        let q = document.querySelectorAll('#ruslan-quotes .card, #sergo-quotes .card').length;
-        let e = document.querySelectorAll('#events-page .card').length;
-        document.getElementById('live-stats').innerText = `📊 Цитат: ${q} | Событий: ${e}`;
+    function copyQuote(btn) {
+        const card = btn.closest('.card');
+        const text = card.querySelector('.quote-text').innerText;
+        const author = card.querySelector('.author').innerText;
+        navigator.clipboard.writeText(`${text} ${author} (из Архива)`);
+        const toast = document.getElementById('copy-toast');
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 2000);
     }
 
+    function showAchievement(title, desc) {
+        const box = document.getElementById('achievement-box');
+        document.getElementById('ach-title').innerText = title;
+        document.getElementById('ach-desc').innerText = desc;
+        box.classList.add('show');
+        setTimeout(() => box.classList.remove('show'), 4000);
+    }
+
+    function updateStats() {
+        // Считаем уникальные карточки (из личных вкладок, чтобы не дублировать счетчик вкладки "Все")
+        let q = document.querySelectorAll('#ruslan-quotes .card, #sergo-quotes .card, #terminator-quotes .card').length;
+        let e = document.querySelectorAll('#all-events .card').length;
+        document.getElementById('live-stats').innerText = `📊 Всего цитат: ${q} | Событий: ${e}`;
+    }
+
+    // ТАЙМЕР
     setInterval(() => {
         document.querySelectorAll('.time-passed').forEach(t => {
-            const diff = new Date() - new Date(t.dataset.date);
-            const d = Math.floor(diff / 86400000);
-            const h = Math.floor((diff / 3600000) % 24);
-            const m = Math.floor((diff / 60000) % 60);
-            const s = Math.floor((diff / 1000) % 60);
-            t.innerText = `⏱ Прошло: ${d}д ${h}ч ${m}м ${s}с`;
+            const eventDate = new Date(t.dataset.date);
+            const diff = new Date() - eventDate;
+            if (diff > 0) {
+                const d = Math.floor(diff / 86400000);
+                const h = Math.floor((diff / 3600000) % 24);
+                const m = Math.floor((diff / 60000) % 60);
+                const s = Math.floor((diff / 1000) % 60);
+                t.innerText = `⏱ Прошло: ${d}д ${h}ч ${m}м ${s}с`;
+            } else {
+                t.innerText = "⏱ Событие еще не наступило";
+            }
         });
     }, 1000);
 
+    // ПАСХАЛКИ И ТЕРМИНАЛ
     let keys = "";
     window.addEventListener('keydown', e => {
         keys += e.key.toLowerCase();
-        if (keys.endsWith("ruslan")) { document.body.classList.toggle('ruslan-mode'); keys = ""; }
+        if (keys.endsWith("ruslan")) { 
+            document.body.classList.toggle('ruslan-mode'); 
+            showAchievement("Тёмный рыцарь", "Активирован режим RUSLAN");
+            keys = ""; 
+        }
         if (e.key === "~" || e.key === "ё") { 
             const t = document.getElementById('terminal');
             t.style.display = t.style.display === "block" ? "none" : "block";
@@ -392,8 +453,13 @@
 
     document.getElementById('terminal-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-            if (this.value === 'admin') document.getElementById('secret-quote').style.display = 'block';
-            this.value = ""; document.getElementById('terminal').style.display = 'none';
+            if (this.value === 'admin') {
+                document.getElementById('secret-quote').style.display = 'block';
+                showAchievement("Хакер", "Удаленные данные восстановлены");
+                updateStats();
+            }
+            this.value = ""; 
+            document.getElementById('terminal').style.display = 'none';
         }
     });
 
@@ -401,3 +467,4 @@
 </script>
 </body>
 </html>
+
