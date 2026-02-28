@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерактивный Архив v1.4.1 PRO</title>
+    <title>Интерактивный Архив v1.5 PRO</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -41,20 +41,30 @@
         /* КАНВАС ДЛЯ ЗВЕЗДНОГО НЕБА */
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: var(--bg); transition: background 0.5s; }
 
+        /* КНОПКА И МОДАЛКА ОБНОВЛЕНИЙ */
+        .update-btn { position: fixed; top: 15px; left: 15px; background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.3s; }
+        .update-btn:hover { transform: scale(1.05); }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 4000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
+        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 15px; max-width: 500px; width: 90%; color: var(--text); border: 1px solid var(--primary); box-shadow: var(--neon); position: relative; }
+        .modal-close { position: absolute; top: 10px; right: 15px; background: transparent; border: none; font-size: 1.5em; cursor: pointer; color: var(--text); }
+        .modal-content ul { padding-left: 20px; line-height: 1.6; }
+
         .container { 
             width: 100%; max-width: 700px; background: var(--card-bg); padding: 30px; border-radius: 20px; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 1px solid var(--neon); backdrop-filter: blur(5px); 
+            margin-top: 40px;
         }
 
         .stats-header { text-align: center; font-size: 0.9em; color: #888; margin-bottom: 15px; font-weight: bold; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px; }
         .search-container { margin-bottom: 20px; width: 100%; }
         #search-input { width: 100%; padding: 12px 15px; border: 2px solid #ddd; border-radius: 10px; background: white; color: #333; font-size: 16px; outline: none; transition: 0.3s; box-sizing: border-box; }
 
-        .main-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 12px; }
+        .main-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 12px; flex-wrap: wrap; }
         .main-btn { padding: 10px 25px; cursor: pointer; border: none; background: none; font-weight: bold; border-radius: 8px; color: var(--text); }
         .main-btn.active { background: var(--primary); color: white; box-shadow: var(--neon); }
 
-        .sub-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; overflow-x: auto; }
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; overflow-x: auto; scrollbar-width: thin; }
         .tab-btn { padding: 6px 12px; cursor: pointer; border: none; background: rgba(0,0,0,0.05); border-radius: 6px; color: var(--text); white-space: nowrap; }
         .tab-btn.active { background: #6c757d; color: white; }
 
@@ -92,6 +102,23 @@
 
 <canvas id="bg-canvas"></canvas>
 
+<button class="update-btn" onclick="toggleModal(true)">📋 Что нового?</button>
+
+<div class="modal-overlay" id="update-modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="toggleModal(false)">×</button>
+        <h2>Обновление v1.5: Мега Апдейт</h2>
+        <ul>
+            <li>Добавлена эта кнопка "Что нового" для истории обновлений.</li>
+            <li>Добавлен раздел "Предметы" (находится в разработке).</li>
+            <li>Добавлены новые вкладки: Артем В., Вова В., Артем и Вова.</li>
+            <li>Перенос и исправление: "3 целых Руслан десятый" и "Танк выглядывает" распределены по новым вкладкам.</li>
+            <li>Новая цитата Терминатора: "Дебилы малолетние".</li>
+            <li>Новые события: "Андрей в туалете", "Добавление Терминатора в звонок", "Душение на технологии" (с таймером).</li>
+        </ul>
+    </div>
+</div>
+
 <div id="copy-toast" class="toast">Скопировано в буфер!</div>
 <div id="achievement-box" class="achievement">
     <strong id="ach-title">Достижение!</strong><br><span id="ach-desc">Текст достижения</span>
@@ -108,6 +135,7 @@
     <div class="main-nav">
         <button class="main-btn active" onclick="showPage('quotes-page')">Цитаты</button>
         <button class="main-btn" onclick="showPage('events-page')">События</button>
+        <button class="main-btn" onclick="showPage('items-page')">Предметы</button>
     </div>
 
     <div id="quotes-page" class="page active">
@@ -115,17 +143,13 @@
             <button class="tab-btn active" onclick="openSubTab('ruslan', 'quotes')">О Руслане</button>
             <button class="tab-btn" onclick="openSubTab('sergo', 'quotes')">Серго Мерго</button>
             <button class="tab-btn" onclick="openSubTab('terminator', 'quotes')">Андрей Терминатор</button>
+            <button class="tab-btn" onclick="openSubTab('artem', 'quotes')">Артем В.</button>
+            <button class="tab-btn" onclick="openSubTab('vova', 'quotes')">Вова В.</button>
+            <button class="tab-btn" onclick="openSubTab('artem-vova', 'quotes')">Артем и Вова</button>
             <button class="tab-btn" onclick="openSubTab('all', 'quotes')">Все</button>
         </div>
 
         <div id="ruslan-quotes" class="content-section active">
-            <div class="card" data-quote-id="quote_ruslan_3_10">
-                <span class="quote-text">«3 целых Руслан десятых»</span><span class="author">— Артем Великий</span>
-                <div class="like-section">
-                    <span class="like-btn" onclick="toggleLike('quote_ruslan_3_10')">❤️</span><span class="like-count">0</span>
-                    <button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button>
-                </div>
-            </div>
             <div id="secret-quote" style="display: none;">
                 <div class="card" data-quote-id="quote_secret_masulya" style="border: 2px dashed #d9534f;">
                     <span class="quote-text">«Че за масюля на мне»</span><span class="author">— Артем Великий</span>
@@ -136,41 +160,52 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div id="sergo-quotes" class="content-section">
-            <div class="card" data-quote-id="quote_sergo_1">
-                <span class="quote-text">«Открывайте слушайте»</span><span class="author">— Серго Мерго</span>
-                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_1')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
-            </div>
-            <div class="card" data-quote-id="quote_sergo_2">
-                <span class="quote-text">«Коля выйди Коля выйди»</span><span class="author">— Серго Мерго</span>
-                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_2')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
-            </div>
-            <div class="card" data-quote-id="quote_sergo_3">
-                <span class="quote-text">«Украинцы»</span><span class="author">— Серго Мерго</span>
-                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_3')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
-            </div>
-            <div class="card" data-quote-id="quote_sergo_4">
-                <span class="quote-text">«Сволочи»</span><span class="author">— Серго Мерго</span>
-                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_4')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
-            </div>
-        </div>
-
-        <div id="terminator-quotes" class="content-section">
             <p style="text-align: center; opacity: 0.5;">Цитат пока нет.</p>
         </div>
 
-        <div id="all-quotes" class="content-section">
-            <div class="card" data-quote-id="quote_vova_tank">
-                <span class="quote-text">«Танк выглядывает»</span><span class="author">— Вова вел. Артем вел.</span>
-                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_vova_tank')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
-            </div>
-            <div class="card" data-quote-id="quote_ruslan_3_10"><span class="quote-text">«3 целых Руслан десятых»</span><span class="author">— Артем Великий</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_ruslan_3_10')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+        <div id="sergo-quotes" class="content-section">
             <div class="card" data-quote-id="quote_sergo_1"><span class="quote-text">«Открывайте слушайте»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_1')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
             <div class="card" data-quote-id="quote_sergo_2"><span class="quote-text">«Коля выйди Коля выйди»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_2')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
             <div class="card" data-quote-id="quote_sergo_3"><span class="quote-text">«Украинцы»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_3')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
             <div class="card" data-quote-id="quote_sergo_4"><span class="quote-text">«Сволочи»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_4')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+        </div>
+
+        <div id="terminator-quotes" class="content-section">
+            <div class="card" data-quote-id="quote_term_1">
+                <span class="quote-text">«Дебилы малолетние»</span><span class="author">— Андрей.Т</span>
+                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_term_1')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
+            </div>
+        </div>
+
+        <div id="artem-quotes" class="content-section">
+            <div class="card" data-quote-id="quote_ruslan_3_10">
+                <span class="quote-text">«3 целых Руслан десятый»</span><span class="author">— Артем Великий</span>
+                <div class="like-section">
+                    <span class="like-btn" onclick="toggleLike('quote_ruslan_3_10')">❤️</span><span class="like-count">0</span>
+                    <button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="vova-quotes" class="content-section">
+            <p style="text-align: center; opacity: 0.5;">Цитат пока нет.</p>
+        </div>
+
+        <div id="artem-vova-quotes" class="content-section">
+            <div class="card" data-quote-id="quote_vova_tank">
+                <span class="quote-text">«Танк выглядывает»</span><span class="author">— Вова вел. Артем вел.</span>
+                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_vova_tank')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
+            </div>
+        </div>
+
+        <div id="all-quotes" class="content-section">
+            <div class="card" data-quote-id="quote_ruslan_3_10"><span class="quote-text">«3 целых Руслан десятый»</span><span class="author">— Артем Великий</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_ruslan_3_10')">❤️</span><span class="like-count">0</span></div></div>
+            <div class="card" data-quote-id="quote_sergo_1"><span class="quote-text">«Открывайте слушайте»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_1')">❤️</span><span class="like-count">0</span></div></div>
+            <div class="card" data-quote-id="quote_sergo_2"><span class="quote-text">«Коля выйди Коля выйди»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_2')">❤️</span><span class="like-count">0</span></div></div>
+            <div class="card" data-quote-id="quote_sergo_3"><span class="quote-text">«Украинцы»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_3')">❤️</span><span class="like-count">0</span></div></div>
+            <div class="card" data-quote-id="quote_sergo_4"><span class="quote-text">«Сволочи»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_4')">❤️</span><span class="like-count">0</span></div></div>
+            <div class="card" data-quote-id="quote_term_1"><span class="quote-text">«Дебилы малолетние»</span><span class="author">— Андрей.Т</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_term_1')">❤️</span><span class="like-count">0</span></div></div>
+            <div class="card" data-quote-id="quote_vova_tank"><span class="quote-text">«Танк выглядывает»</span><span class="author">— Вова вел. Артем вел.</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_vova_tank')">❤️</span><span class="like-count">0</span></div></div>
         </div>
     </div>
 
@@ -179,6 +214,9 @@
             <button class="tab-btn active" onclick="openSubTab('ruslan', 'events')">О Руслане</button>
             <button class="tab-btn" onclick="openSubTab('sergo', 'events')">Серго Мерго</button>
             <button class="tab-btn" onclick="openSubTab('terminator', 'events')">Андрей Терминатор</button>
+            <button class="tab-btn" onclick="openSubTab('artem', 'events')">Артем В.</button>
+            <button class="tab-btn" onclick="openSubTab('vova', 'events')">Вова В.</button>
+            <button class="tab-btn" onclick="openSubTab('artem-vova', 'events')">Артем и Вова</button>
             <button class="tab-btn" onclick="openSubTab('all', 'events')">Все</button>
         </div>
 
@@ -200,29 +238,42 @@
         </div>
 
         <div id="terminator-events" class="content-section">
-            <div class="card">
-                <div class="event-header"><strong>Пощечина Терминатора</strong><small>??.??.??</small></div>
-                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
-                <div class="details-text">??? ДЕНЬ,МЕСЯЦ,ГОД. Андрей терминатор встал со своего стула и будучи злым дал пощечину Савелию и он ударился об стену.</div>
-            </div>
+            <div class="card"><div class="event-header"><strong>Пощечина Терминатора</strong><small>??.??.??</small></div><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">??? ДЕНЬ,МЕСЯЦ,ГОД. Андрей терминатор встал со своего стула и будучи злым дал пощечину Савелию и он ударился об стену.</div></div>
+            <div class="card"><div class="event-header"><strong>Андрей в туалете</strong><small>??.??.??</small></div><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один день Артем и Вова решились сходить в самый опасный туалет школы и когда они зашли то увидели как Терминатор Андрей писает и они сбежали едва не выдав себя.<br><strong>Авторы: Артем.В и Вова.В</strong></div></div>
+            <div class="card"><div class="event-header"><strong>Добавление Терминатора в звонок</strong><small>??.??.2026</small></div><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один день Вова и Артем решили поиграть в Кс2 и когда они случайно отключились Артем случайно добавил в звонок Андрея Терминатора и ему повезло что он быстро не подключился и Артем быстро отключился от звонка и оставив андрея одного.</div></div>
+        </div>
+
+        <div id="artem-events" class="content-section">
+            <div class="card"><div class="event-header"><strong>Добавление Терминатора в звонок</strong><small>??.??.2026</small></div><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один день Вова и Артем решили поиграть в Кс2 и когда они случайно отключились Артем случайно добавил в звонок Андрея Терминатора и ему повезло что он быстро не подключился и Артем быстро отключился от звонка и оставив андрея одного.</div></div>
+        </div>
+
+        <div id="vova-events" class="content-section">
+            <p style="text-align: center; opacity: 0.5;">Событий пока нет.</p>
+        </div>
+
+        <div id="artem-vova-events" class="content-section">
+            <div class="card"><div class="event-header"><strong>Андрей в туалете</strong><small>??.??.??</small></div><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один день Артем и Вова решились сходить в самый опасный туалет школы и когда они зашли то увидели как Терминатор Андрей писает и они сбежали едва не выдав себя.<br><strong>Авторы: Артем.В и Вова.В</strong></div></div>
+            <div class="card"><div class="event-header"><strong>Душение на технологии</strong><small>24.12.24</small></div><span class="time-passed" data-date="2024-12-24T00:00:00">Загрузка таймера...</span><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В тот день Артем встал и подошел к Диме и Руслану сзади и что то делал над ними и когда его заметил Руслан то Артем начал шуточно душить Диму и после убежал.</div></div>
         </div>
 
         <div id="all-events" class="content-section">
             <div class="card"><strong>Пистолет в кобуру</strong> <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один хороший день Руслан сидел и...</div></div>
-            <div class="card">
-                <strong>Арт обстрел Серго мерго</strong><br>
-                <span class="time-passed" data-date="2026-02-27T09:35:00">Загрузка таймера...</span><br>
-                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
-                <div class="details-text">В 9:35 был произведен арт обстрел Серго мерго...</div>
-            </div>
+            <div class="card"><strong>Арт обстрел Серго мерго</strong><br><span class="time-passed" data-date="2026-02-27T09:35:00">Загрузка таймера...</span><br><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В 9:35 был произведен арт обстрел Серго мерго...</div></div>
             <div class="card"><strong>Пощечина Терминатора</strong> <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">??? ДЕНЬ,МЕСЯЦ,ГОД. Андрей терминатор встал...</div></div>
+            <div class="card"><strong>Андрей в туалете</strong> <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один день Артем и Вова решились сходить в самый опасный туалет школы...</div></div>
+            <div class="card"><strong>Добавление Терминатора в звонок</strong> <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один день Вова и Артем решили поиграть в Кс2...</div></div>
+            <div class="card"><strong>Душение на технологии</strong><br><span class="time-passed" data-date="2024-12-24T00:00:00">Загрузка таймера...</span><br><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В тот день Артем встал и подошел к Диме и Руслану сзади...</div></div>
         </div>
+    </div>
+
+    <div id="items-page" class="page">
+        <p style="text-align: center; font-size: 1.2em; font-weight: bold; padding: 40px 0;">В разработке 🛠️</p>
     </div>
 </div>
 
 <script>
     // ==========================================
-    // НАСТРОЙКА FIREBASE (КЛЮЧИ ВСТАВЛЕНЫ)
+    // НАСТРОЙКА FIREBASE (КЛЮЧИ СОХРАНЕНЫ)
     // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyCAf9GfgjJSuIC3i-NZq6TH-E3OjYDj5ng",
@@ -380,6 +431,10 @@
         event.currentTarget.classList.add('active');
     }
 
+    function toggleModal(show) {
+        document.getElementById('update-modal').style.display = show ? 'flex' : 'none';
+    }
+
     function filterQuotes() {
         let input = document.getElementById('search-input').value.toLowerCase();
         document.querySelectorAll('.card').forEach(card => {
@@ -412,8 +467,8 @@
     }
 
     function updateStats() {
-        // Считаем уникальные карточки (из личных вкладок, чтобы не дублировать счетчик вкладки "Все")
-        let q = document.querySelectorAll('#ruslan-quotes .card, #sergo-quotes .card, #terminator-quotes .card').length;
+        // Считаем все уникальные карточки во вкладке "Все" (чтобы избежать дублирования из других вкладок)
+        let q = document.querySelectorAll('#all-quotes .card').length;
         let e = document.querySelectorAll('#all-events .card').length;
         document.getElementById('live-stats').innerText = `📊 Всего цитат: ${q} | Событий: ${e}`;
     }
@@ -456,7 +511,10 @@
             if (this.value === 'admin') {
                 document.getElementById('secret-quote').style.display = 'block';
                 showAchievement("Хакер", "Удаленные данные восстановлены");
-                updateStats();
+                // Добавляем секретную цитату в счетчик
+                let q = document.querySelectorAll('#all-quotes .card').length + 1;
+                let ev = document.querySelectorAll('#all-events .card').length;
+                document.getElementById('live-stats').innerText = `📊 Всего цитат: ${q} | Событий: ${ev}`;
             }
             this.value = ""; 
             document.getElementById('terminal').style.display = 'none';
@@ -467,4 +525,5 @@
 </script>
 </body>
 </html>
+
 
