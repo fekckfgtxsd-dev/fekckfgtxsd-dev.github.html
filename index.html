@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерактивный Архив v1.1</title>
+    <title>Интерактивный Архив v1.2</title>
     <style>
         :root {
             --primary: #007bff;
@@ -23,6 +23,12 @@
 
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 20px; color: var(--text); transition: all 0.5s ease; }
         .container { width: 100%; max-width: 700px; background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 1px solid var(--neon); }
+
+        /* СТАТИСТИКА */
+        .stats-header {
+            text-align: center; font-size: 0.9em; color: #888; margin-bottom: 15px; font-weight: bold;
+            background: rgba(0,0,0,0.03); padding: 10px; border-radius: 10px;
+        }
 
         .search-container { margin-bottom: 20px; width: 100%; }
         #search-input {
@@ -52,6 +58,9 @@
 
         .event-header { display: flex; justify-content: space-between; align-items: center; }
         .details-text { display: none; margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 8px; border: 1px dashed var(--primary); font-size: 0.95em; line-height: 1.5; }
+        
+        /* ТАЙМЕР */
+        .time-passed { font-size: 0.85em; color: #d9534f; margin-top: 8px; font-weight: bold; display: block; }
 
         .achievement {
             position: fixed; top: 20px; right: -300px; background: #333; color: #fff; padding: 15px; 
@@ -88,6 +97,8 @@
 </div>
 
 <div class="container">
+    <div class="stats-header" id="live-stats">Загрузка статистики...</div>
+
     <div class="search-container">
         <input type="text" id="search-input" placeholder="Поиск цитат или событий..." onkeyup="filterQuotes()">
     </div>
@@ -188,6 +199,7 @@
                     <strong>Арт обстрел Серго мерго</strong>
                     <small>27.02.26 | 9:35</small>
                 </div>
+                <span class="time-passed" data-date="2026-02-27T09:35:00">Загрузка таймера...</span>
                 <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
                 <div class="details-text">В 9:35 был произведен арт обстрел Серго мерго. Пострадал 1 человек (Серго мерго). В качестве снарядов была кожура от мандаринов.</div>
             </div>
@@ -206,7 +218,11 @@
 
         <div id="all-events" class="content-section">
             <div class="card"><strong>Пистолет в кобуру</strong> <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button><div class="details-text">В один хороший день Руслан сидел и...</div></div>
-            <div class="card"><strong>Арт обстрел Серго мерго</strong> <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button></div>
+            <div class="card">
+                <strong>Арт обстрел Серго мерго</strong> 
+                <br><span class="time-passed" data-date="2026-02-27T09:35:00">Загрузка таймера...</span>
+                <br><button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
+            </div>
             <div class="card"><strong>Пощечина Терминатора</strong> <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button></div>
         </div>
     </div>
@@ -237,9 +253,11 @@
     }
 
     function toggleDetails(btn) {
-        const text = btn.nextElementSibling;
-        text.style.display = (text.style.display === "block") ? "none" : "block";
-        btn.innerText = (text.style.display === "block") ? "Скрыть" : "Подробнее";
+        const text = btn.nextElementSibling || btn.parentElement.querySelector('.details-text');
+        if(text) {
+            text.style.display = (text.style.display === "block") ? "none" : "block";
+            btn.innerText = (text.style.display === "block") ? "Скрыть" : "Подробнее";
+        }
     }
 
     function copyQuote(btn) {
@@ -259,6 +277,37 @@
         box.classList.add('show');
         setTimeout(() => box.classList.remove('show'), 4000);
     }
+
+    // ЛОГИКА СТАТИСТИКИ
+    function updateStats() {
+        let totalQuotes = document.querySelectorAll('#all-quotes .card').length;
+        let totalEvents = document.querySelectorAll('#all-events .card').length;
+        document.getElementById('live-stats').innerText = `📊 Всего цитат: ${totalQuotes} | Событий: ${totalEvents}`;
+    }
+
+    // ЛОГИКА ТАЙМЕРА
+    function updateTimers() {
+        const timers = document.querySelectorAll('.time-passed');
+        const now = new Date();
+        timers.forEach(timer => {
+            const eventDate = new Date(timer.getAttribute('data-date'));
+            const diff = now - eventDate;
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((diff / 1000 / 60) % 60);
+                const seconds = Math.floor((diff / 1000) % 60);
+                timer.innerText = `⏱ Прошло: ${days} дн. ${hours} ч. ${minutes} мин. ${seconds} сек.`;
+            } else {
+                timer.innerText = "⏱ Событие еще не наступило";
+            }
+        });
+    }
+
+    // ЗАПУСК СКРИПТОВ ПРИ ЗАГРУЗКЕ
+    updateStats();
+    updateTimers();
+    setInterval(updateTimers, 1000); // Таймер тикает каждую секунду
 
     let keys = "";
     window.addEventListener('keydown', (e) => {
@@ -281,6 +330,7 @@
                 document.getElementById('secret-quote').style.display = 'block';
                 showAchievement("Хакер", "Удаленные данные восстановлены");
                 document.getElementById('terminal').style.display = 'none';
+                updateStats(); // Обновляем стату при восстановлении цитаты
             }
             this.value = "";
         }
