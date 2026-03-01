@@ -39,6 +39,7 @@
         .control-btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.3s; }
         .control-btn:hover { transform: scale(1.05); }
         #owner-btn { background: #d9534f; display: none; }
+        #admin-pending-btn { background: #ff9800; display: none; }
 
         .next-update-timer { position: fixed; top: 15px; right: 15px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 15px; border-radius: 10px; font-weight: bold; border: 1px solid var(--primary); z-index: 100; text-align: center; box-shadow: var(--neon); }
 
@@ -105,6 +106,11 @@
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 20px; display: none; z-index: 3000; }
         
         textarea { width: 100%; height: 100px; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.05); color: var(--text); border: 1px solid #ccc; font-family: inherit; resize: none; box-sizing: border-box; }
+
+        /* СТИЛИ ДЛЯ АДМИН-ПАНЕЛИ ПРЕДЛОЖКИ */
+        .pending-item { background: rgba(0,0,0,0.05); padding: 10px; margin-bottom: 10px; border-radius: 8px; border-left: 3px solid #ff9800; display: flex; justify-content: space-between; align-items: center; }
+        .pending-text { flex-grow: 1; margin-right: 10px; font-size: 0.9em; word-wrap: break-word; }
+        .delete-btn { background: #d9534f; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -115,6 +121,7 @@
     <button class="control-btn" onclick="toggleModal('update-modal')">📋 Что нового?</button>
     <button class="control-btn" onclick="toggleModal('suggest-modal')">➕ Предложить цитату</button>
     <button class="control-btn" id="owner-btn" onclick="sendGlobalMessage()">💬 Сообщение всем</button>
+    <button class="control-btn" id="admin-pending-btn" onclick="openAdminPending()">📥 Предложка (Админ)</button>
 </div>
 
 <div class="next-update-timer">
@@ -131,7 +138,7 @@
             <li>Теперь при копировании цитаты копируется и ссылка-телепорт прямо на нее (с подсветкой).</li>
             <li>Добавлен виджет с таймером до следующей обновы.</li>
             <li>В терминал добавлены команды: <code>credits</code>, <code>version</code>, и секретная команда <code>???</code>.</li>
-            <li>Глобальная система сообщений (Доступна только избранным).</li>
+            <li>Глобальная система сообщений и секретная панель админа для предложки.</li>
         </ul>
     </div>
 </div>
@@ -143,6 +150,17 @@
         <p>Напиши цитату и автора. Она будет отправлена на проверку Архивариусу!</p>
         <textarea id="suggest-text" placeholder="«Цитата...» — Автор"></textarea>
         <button class="action-btn" style="width: 100%; margin-top: 15px; font-size: 1.1em;" onclick="submitSuggestion()">Отправить</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="admin-pending-modal" style="z-index: 5000;">
+    <div class="modal-content" style="border: 2px solid #ff9800;">
+        <button class="modal-close" onclick="toggleModal('admin-pending-modal')">×</button>
+        <h2 style="color: #ff9800;">📥 Ожидают проверки</h2>
+        <div id="pending-list" style="max-height: 300px; overflow-y: auto; text-align: left; padding-right: 10px;">
+            Загрузка...
+        </div>
+        <p style="font-size: 0.8em; color: gray; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 10px;">*Чтобы добавить цитату на сайт навсегда, скопируй её текст и вставь в HTML код (в нужную вкладку). Кнопка 🗑️ только удаляет её из базы ожидания.</p>
     </div>
 </div>
 
@@ -369,7 +387,7 @@
     }
 
     // ==========================================
-    // 3. ПРЕДЛОЖКА ЦИТАТ
+    // 3. ПРЕДЛОЖКА ЦИТАТ И АДМИН ПАНЕЛЬ
     // ==========================================
     function submitSuggestion() {
         const text = document.getElementById('suggest-text').value.trim();
@@ -380,6 +398,45 @@
             showAchievement("Отправлено!", "Цитата ушла на проверку.");
         } else {
             alert("Пожалуйста, введите текст!");
+        }
+    }
+
+    function openAdminPending() {
+        toggleModal('admin-pending-modal');
+        const listDiv = document.getElementById('pending-list');
+        listDiv.innerHTML = "Загрузка...";
+        
+        if(database) {
+            // Читаем базу данных в реальном времени
+            database.ref('pending_quotes').on('value', snap => {
+                const data = snap.val();
+                listDiv.innerHTML = "";
+                if(data) {
+                    for(let key in data) {
+                        const item = data[key];
+                        const date = new Date(item.time).toLocaleString();
+                        listDiv.innerHTML += `
+                            <div class="pending-item">
+                                <div class="pending-text">
+                                    <strong>От: ${item.user}</strong> <small>(${date})</small><br>
+                                    <i>${item.text}</i>
+                                </div>
+                                <button class="delete-btn" onclick="deletePending('${key}')">🗑️</button>
+                            </div>
+                        `;
+                    }
+                } else {
+                    listDiv.innerHTML = "<p>Предложек пока нет. Все чисто!</p>";
+                }
+            });
+        } else {
+            listDiv.innerHTML = "Ошибка базы данных.";
+        }
+    }
+
+    function deletePending(key) {
+        if(confirm("Точно удалить эту предложку навсегда?") && database) {
+            database.ref('pending_quotes/' + key).remove();
         }
     }
 
@@ -504,6 +561,7 @@
             } 
             else if (val === 'owner') {
                 document.getElementById('owner-btn').style.display = 'block';
+                document.getElementById('admin-pending-btn').style.display = 'block'; // Показываем админку предложки
                 showAchievement("Система", "Доступ [OWNER] Разрешен");
             }
 
@@ -571,5 +629,6 @@
 </script>
 </body>
 </html>
+
 
 
