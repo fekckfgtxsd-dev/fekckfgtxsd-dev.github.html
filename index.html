@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Интерактивный Архив v2.1 TRAPSTAN FIXED</title>
     
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
@@ -101,7 +105,7 @@
         .achievement { position: fixed; top: 20px; right: -300px; background: #333; color: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.5s; z-index: 1000; border-left: 5px solid gold; }
         .achievement.show { right: 20px; }
 
-        /* ТЕРМИНАЛ (СТИЛИ ВОССТАНОВЛЕНЫ) */
+        /* ТЕРМИНАЛ */
         #terminal { 
             position: fixed; 
             top: 50%; 
@@ -142,11 +146,30 @@
         /* СТИЛЬ ДЛЯ СИМВОЛОВ ГОДА */
         .year-symbol { font-size: 1.5em; font-weight: bold; text-align: center; color: var(--primary); margin-bottom: 5px; }
         .symbol-card { text-align: center; border: 2px solid var(--primary); }
+
+        /* --- МОБИЛЬНАЯ АДАПТАЦИЯ (PWA) --- */
+        #mobile-terminal-btn { display: none; }
+        
+        @media (max-width: 600px) {
+            .top-left-controls { flex-direction: row; flex-wrap: wrap; width: 100%; top: 10px; left: 10px; gap: 5px; }
+            .control-btn { font-size: 0.8em; padding: 6px 10px; }
+            .next-update-timer { top: auto; bottom: 80px; left: 10px; right: auto; font-size: 0.8em; padding: 5px; z-index: 1000; }
+            .container { margin-top: 80px; padding: 15px; width: 95%; box-sizing: border-box; }
+            .chat-widget { width: calc(100% - 20px); right: 10px; bottom: 10px; }
+            .main-btn { padding: 8px 12px; font-size: 0.9em; flex-grow: 1; text-align: center; }
+            .sub-tabs { padding-bottom: 5px; }
+            .tab-btn { font-size: 0.85em; padding: 5px 10px; }
+            
+            /* Кнопка терминала для телефонов (на ПК ее не видно) */
+            #mobile-terminal-btn { display: block !important; position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #00ff41; border: 1px solid #00ff41; padding: 12px 10px; border-radius: 50%; z-index: 3000; font-family: monospace; font-weight: bold; font-size: 16px; box-shadow: 0 0 10px #00ff41; cursor: pointer; }
+        }
     </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
+
+<button id="mobile-terminal-btn" onclick="toggleMobileTerminal()">>_</button>
 
 <div class="top-left-controls">
     <button class="control-btn" onclick="toggleModal('update-modal')">📋 Что нового?</button>
@@ -170,6 +193,7 @@
         <button class="modal-close" onclick="toggleModal('update-modal')">×</button>
         <h2>Обновление: TRAPSTAN & SYMBOLS</h2>
         <ul style="padding-left: 20px; line-height: 1.6;">
+            <li>📱 <strong>Мобильная версия:</strong> Добавлена поддержка телефонов и PWA!</li>
             <li>🌍 <strong>Трапостан:</strong> Добавлена целая страна! Новая вкладка с историей и событиями.</li>
             <li>🏆 <strong>Символы Года:</strong> Новая вкладка, где собраны символы 2024, 2025 и 2026 годов.</li>
             <li>🆕 <strong>Система "Новое":</strong> Вкладка "Новое" в цитатах. Исчезает после просмотра!</li>
@@ -426,23 +450,18 @@
         p.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); 
         p.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
         
-        // Логика для вкладок (trapstan events/history)
         let contentId = cat + '-' + type;
         document.getElementById(contentId).classList.add('active'); 
         event.currentTarget.classList.add('active'); 
     }
 
-    // Логика исчезновения вкладки "Новое"
     function checkNewTab() {
         if(localStorage.getItem('new_quotes_read_v1')) {
             const btn = document.getElementById('new-tab-btn');
             if(btn) btn.style.display = 'none';
         }
     }
-    function markNewAsRead() {
-        localStorage.setItem('new_quotes_read_v1', 'true');
-    }
-    // Проверка при загрузке
+    function markNewAsRead() { localStorage.setItem('new_quotes_read_v1', 'true'); }
     checkNewTab();
 
     function toggleModal(id) { const el = document.getElementById(id); el.style.display = el.style.display === "flex" ? "none" : "flex"; }
@@ -515,7 +534,6 @@
     // ==========================================
     // 4. ТАЙМЕРЫ
     // ==========================================
-    // Таймер до обновы: 6 марта в 17:20
     const nextUpdateDate = new Date('2026-03-06T17:20:00');
     
     setInterval(() => {
@@ -543,7 +561,7 @@
     }, 1000);
 
     // ==========================================
-    // 5. COPY, LIKE & EFFECTS
+    // 5. ССЫЛКИ, КОПИРОВАНИЕ И ЛАЙКИ
     // ==========================================
     function copyQuote(btn) {
         const card = btn.closest('.card');
@@ -574,11 +592,10 @@
     if(database) { database.ref('announcement').on('value', snap => { const data = snap.val(); if(data && data.time > loadTime) { document.getElementById('global-msg-text').innerText = data.text; document.getElementById('global-msg-modal').style.display = 'flex'; } }); }
 
     // ==========================================
-    // 6. ТЕРМИНАЛ И ПАСХАЛКИ (ВОССТАНОВЛЕНО)
+    // 6. ТЕРМИНАЛ И ПАСХАЛКИ
     // ==========================================
     let keys = "";
     
-    // Пасхалка Ruslan Mode при вводе с клавиатуры
     window.addEventListener('keydown', e => {
         keys += e.key.toLowerCase();
         if (keys.endsWith("ruslan")) { 
@@ -586,21 +603,18 @@
             showAchievement("Режим Бога", "Активирована тема Руслана");
             keys = ""; 
         }
-        // Ограничитель буфера
         if(keys.length > 20) keys = keys.substring(keys.length - 20);
     });
 
-    // Открытие терминала на тильду ~
     window.addEventListener('keydown', e => {
         if (e.key === "~" || e.key === "ё" || e.code === "Backquote") { 
-            e.preventDefault(); // Чтобы не печаталась тильда
+            e.preventDefault(); 
             const t = document.getElementById('terminal'); 
             t.style.display = t.style.display === "block" ? "none" : "block"; 
             if(t.style.display === "block") document.getElementById('terminal-input').focus();
         }
     });
 
-    // Команды терминала
     document.getElementById('terminal-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             const val = this.value.toLowerCase().trim();
@@ -626,7 +640,9 @@
         }
     });
 
-    // Канвас (Звезды)
+    // ==========================================
+    // 7. АНИМАЦИИ (ЗВЕЗДЫ)
+    // ==========================================
     const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d');
     let particles = []; const mouse = { x: null, y: null, radius: 100 };
     window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
@@ -638,6 +654,25 @@
     function toggleLike(id) { const isLikedLocal = localStorage.getItem('liked_' + id); if (database) { database.ref('likes/' + id).transaction(c => isLikedLocal ? (localStorage.removeItem('liked_'+id), (c||1)-1) : (localStorage.setItem('liked_'+id, 't'), (c||0)+1)); } else { let c = parseInt(document.querySelector(`[data-quote-id="${id}"] .like-count`).innerText) || 0; if(isLikedLocal) { localStorage.removeItem('liked_'+id); updateDOM(id, c-1, false); } else { localStorage.setItem('liked_'+id, 't'); updateDOM(id, c+1, true); } } }
     if (database) database.ref('likes').on('value', s => { const d = s.val()||{}; document.querySelectorAll('.card[data-quote-id]').forEach(c => { const id = c.dataset.quoteId; updateDOM(id, d[id]||0, localStorage.getItem('liked_'+id)); }); });
     function updateDOM(id, count, liked) { document.querySelectorAll(`[data-quote-id="${id}"]`).forEach(c => { c.querySelector('.like-count').innerText = count; const btn = c.querySelector('.like-btn'); if(btn) liked ? btn.classList.add('liked') : btn.classList.remove('liked'); }); }
+
+    // ==========================================
+    // 8. PWA И МОБИЛЬНЫЙ ТЕРМИНАЛ
+    // ==========================================
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker зарегистрирован!', reg))
+                .catch(err => console.log('Ошибка SW:', err));
+        });
+    }
+
+    // Открытие терминала по кнопке на мобилках
+    function toggleMobileTerminal() {
+        const t = document.getElementById('terminal');
+        t.style.display = t.style.display === "block" ? "none" : "block";
+        if(t.style.display === "block") document.getElementById('terminal-input').focus();
+    }
 </script>
 </body>
 </html>
+
