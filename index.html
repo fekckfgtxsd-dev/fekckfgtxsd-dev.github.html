@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерактивный Архив v2.1 TRAPSTAN FIXED</title>
+    <title>Интерактивный Архив v2.2 TRAPSTAN MOBILE FIX</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a0a0a">
@@ -185,7 +185,10 @@
 <div id="terminal">
     <div id="terminal-header">SYSTEM ROOT ACCESS</div>
     <div style="font-size: 0.8em; margin-bottom: 5px; opacity: 0.7;">Enter command:</div>
-    <input type="text" id="terminal-input" placeholder=">_" autocomplete="off">
+    <div style="display: flex; gap: 10px;">
+        <input type="text" id="terminal-input" placeholder=">_" autocomplete="off" style="flex-grow: 1;">
+        <button class="action-btn" onclick="processTerminalCommand()" style="margin-top:0; padding: 5px 15px;">Ввод</button>
+    </div>
 </div>
 
 <div class="modal-overlay" id="update-modal">
@@ -193,12 +196,11 @@
         <button class="modal-close" onclick="toggleModal('update-modal')">×</button>
         <h2>Обновление: TRAPSTAN & SYMBOLS</h2>
         <ul style="padding-left: 20px; line-height: 1.6;">
-            <li>📱 <strong>Мобильная версия:</strong> Добавлена поддержка телефонов и PWA!</li>
-            <li>🌍 <strong>Трапостан:</strong> Добавлена целая страна! Новая вкладка с историей и событиями.</li>
+            <li>📱 <strong>Мобильная версия:</strong> Фикс багов! Кнопка "Ввод" в терминале и звездное небо реагирует на пальцы.</li>
+            <li>🌍 <strong>Трапостан (История и Цари):</strong> Добавлено "Начало всего" и новая вкладка Царей Трапостана!</li>
             <li>🏆 <strong>Символы Года:</strong> Новая вкладка, где собраны символы 2024, 2025 и 2026 годов.</li>
             <li>🆕 <strong>Система "Новое":</strong> Вкладка "Новое" в цитатах. Исчезает после просмотра!</li>
-            <li>✏️ <strong>Новые цитаты:</strong> Добавлена цитата Артема Великого.</li>
-            <li>🗑️ Убрана вкладка Предметы.</li>
+            <li>✏️ <strong>Новые цитаты:</strong> Добавлена цитата "Действие Руславение".</li>
         </ul>
     </div>
 </div>
@@ -275,6 +277,10 @@
                 <span class="quote-text">«Я тебя щас оттарабаню»</span><span class="author">— Артем.Вел</span>
                 <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_artem_taraban')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
             </div>
+            <div class="card" data-quote-id="quote_artem_ruslavenie">
+                <span class="quote-text">«Действие Руславение»</span><span class="author">— Артем.Вел</span>
+                <div class="like-section"><span class="like-btn" onclick="toggleLike('quote_artem_ruslavenie')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div>
+            </div>
             <p style="text-align: center; color: gray; font-size: 0.8em; margin-top: 20px;">*Эта вкладка исчезнет при следующем входе.</p>
         </div>
 
@@ -306,6 +312,7 @@
         <div id="artem-quotes" class="content-section">
             <div class="card" data-quote-id="quote_ruslan_3_10"><span class="quote-text">«3 целых Руслан десятый»</span><span class="author">— Артем Великий</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_ruslan_3_10')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
             <div class="card" data-quote-id="quote_artem_taraban"><span class="quote-text">«Я тебя щас оттарабаню»</span><span class="author">— Артем.Вел</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_artem_taraban')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+            <div class="card" data-quote-id="quote_artem_ruslavenie"><span class="quote-text">«Действие Руславение»</span><span class="author">— Артем.Вел</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_artem_ruslavenie')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
         </div>
 
         <div id="vova-quotes" class="content-section"><p style="text-align: center; opacity: 0.5;">Цитат пока нет.</p></div>
@@ -316,6 +323,7 @@
 
         <div id="all-quotes" class="content-section">
             <div class="card" data-quote-id="quote_artem_taraban"><span class="quote-text">«Я тебя щас оттарабаню»</span><span class="author">— Артем.Вел</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_artem_taraban')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
+            <div class="card" data-quote-id="quote_artem_ruslavenie"><span class="quote-text">«Действие Руславение»</span><span class="author">— Артем.Вел</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_artem_ruslavenie')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
             <div class="card" data-quote-id="quote_ruslan_3_10"><span class="quote-text">«3 целых Руслан десятый»</span><span class="author">— Артем Великий</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_ruslan_3_10')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
             <div class="card" data-quote-id="quote_sergo_1"><span class="quote-text">«Открывайте слушайте»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_1')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
             <div class="card" data-quote-id="quote_sergo_2"><span class="quote-text">«Коля выйди Коля выйди»</span><span class="author">— Серго Мерго</span><div class="like-section"><span class="like-btn" onclick="toggleLike('quote_sergo_2')">❤️</span><span class="like-count">0</span><button class="action-btn share-btn" style="margin-top:0; margin-left:auto;" onclick="copyQuote(this)">📋</button></div></div>
@@ -330,6 +338,7 @@
         <div class="sub-tabs">
             <button class="tab-btn active" onclick="openSubTab('events', 'trapstan')">События</button>
             <button class="tab-btn" onclick="openSubTab('history', 'trapstan')">История</button>
+            <button class="tab-btn" onclick="openSubTab('kings', 'trapstan')">Цари</button>
         </div>
 
         <div id="events-trapstan" class="content-section active">
@@ -345,11 +354,31 @@
 
         <div id="history-trapstan" class="content-section">
              <div class="card">
-                <div class="event-header"><strong>Зарождение Трапостана</strong><small>04.12.25</small></div>
+                <div class="event-header"><strong>Начало всего</strong></div>
                 <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
                 <div class="details-text">
-                    В день когда все уроки были в одном классе то Руслан сидел в куртке на которой написано "Трапстар" и когда Вова.Вел начал это произносить и он произнес это неправильно он произнес это как "Трапостан" и дальше не понимал что написано но Артем.Вел дополнил и прочитал как увидел "Я и ты большая семья" и после они решили сделать фото в Гемини где Руслан стоит на фоне танка с названием "Трапостан я и ты большая семья".
+                    Вова.Вел придумал Историю,Половину царей но также Артем.Вел тоже очень сильно дополнил историю особенно царей.И так появился он...Трапостан.
                 </div>
+            </div>
+        </div>
+
+        <div id="kings-trapstan" class="content-section">
+            <div class="card">
+                <div class="event-header"><strong>Руслав III</strong><small>966 — 996</small></div>
+                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
+                <div class="details-text">Родился в 966 году, Умер в 996. Он был худшим правителем Трапостана ведь тогда ему пришлось отдать половину территорий стране "Макафония" (Если что она тогда была еще не в своем прайме) И еще тоже самое с Кикирками и Моксиками. Вся страна голодала и все было ужасно. Умер он из за наемных убийц которые вызвали на него горожане его же страны.</div>
+            </div>
+            
+            <div class="card">
+                <div class="event-header"><strong>Руслав II (Великий)</strong><small>944 — 988</small></div>
+                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
+                <div class="details-text">Родился в 944 году, Умер в 988 году. Он был вторым царем и сделал больше всего в стране чем любой правитель Трапостана и успешно выигрывал войны и его боялись все страны. Умер он из за Наемных убийц которые пробрались в его замок к нему ночью (Тогда была ослабленная охрана). Press F Легенде.</div>
+            </div>
+
+            <div class="card">
+                <div class="event-header"><strong>Руслав I</strong><small>864 — 964</small></div>
+                <button class="action-btn" onclick="toggleDetails(this)">Подробнее</button>
+                <div class="details-text">Родился 864 году, Умер в 964 году. Он был первым царем Трапостана и сделал всю страну с самого начала и зародил начало великой страны. Он умер спокойной, обычной смертью.</div>
             </div>
         </div>
     </div>
@@ -592,7 +621,7 @@
     if(database) { database.ref('announcement').on('value', snap => { const data = snap.val(); if(data && data.time > loadTime) { document.getElementById('global-msg-text').innerText = data.text; document.getElementById('global-msg-modal').style.display = 'flex'; } }); }
 
     // ==========================================
-    // 6. ТЕРМИНАЛ И ПАСХАЛКИ
+    // 6. ТЕРМИНАЛ И ПАСХАЛКИ (ОБНОВЛЕНО ДЛЯ ТЕЛЕФОНОВ)
     // ==========================================
     let keys = "";
     
@@ -615,37 +644,53 @@
         }
     });
 
+    // Функция обработки команды (теперь работает и на Enter, и на кнопку)
+    function processTerminalCommand() {
+        const inputEl = document.getElementById('terminal-input');
+        const val = inputEl.value.toLowerCase().trim();
+        
+        if (val === 'admin') { 
+            document.getElementById('secret-quote').style.display = 'block'; 
+            showAchievement("Хакер", "Удаленные данные восстановлены"); 
+        } 
+        else if (val === 'credits') { 
+            alert("💻 СОЗДАТЕЛИ АРХИВА:\n- Артем\n- Вова\n- Руслан\n- AI Assistant"); 
+        } 
+        else if (val === 'version') { 
+            alert("⚙️ ТЕКУЩАЯ ВЕРСИЯ:\nv2.2 TRAPSTAN MOBILE FIX"); 
+        } 
+        else if (val === 'owner') { 
+            document.getElementById('owner-btn').style.display = 'block'; 
+            document.getElementById('admin-pending-btn').style.display = 'block'; 
+            showAchievement("Система", "Доступ [OWNER] Разрешен"); 
+        }
+        
+        inputEl.value = ""; 
+        document.getElementById('terminal').style.display = 'none';
+    }
+
     document.getElementById('terminal-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-            const val = this.value.toLowerCase().trim();
-            
-            if (val === 'admin') { 
-                document.getElementById('secret-quote').style.display = 'block'; 
-                showAchievement("Хакер", "Удаленные данные восстановлены"); 
-            } 
-            else if (val === 'credits') { 
-                alert("💻 СОЗДАТЕЛИ АРХИВА:\n- Артем\n- Вова\n- Руслан\n- AI Assistant"); 
-            } 
-            else if (val === 'version') { 
-                alert("⚙️ ТЕКУЩАЯ ВЕРСИЯ:\nv2.1 TRAPSTAN FIXED"); 
-            } 
-            else if (val === 'owner') { 
-                document.getElementById('owner-btn').style.display = 'block'; 
-                document.getElementById('admin-pending-btn').style.display = 'block'; 
-                showAchievement("Система", "Доступ [OWNER] Разрешен"); 
-            }
-            
-            this.value = ""; 
-            document.getElementById('terminal').style.display = 'none';
+            processTerminalCommand();
         }
     });
 
     // ==========================================
-    // 7. АНИМАЦИИ (ЗВЕЗДЫ)
+    // 7. АНИМАЦИИ (ЗВЕЗДЫ + ФИКС ДЛЯ ТЕЛЕФОНА)
     // ==========================================
     const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d');
     let particles = []; const mouse = { x: null, y: null, radius: 100 };
+    
+    // Поддержка мыши
     window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+    
+    // Поддержка пальцев на экране телефона
+    window.addEventListener('touchmove', (e) => {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+    });
+    window.addEventListener('touchend', () => { mouse.x = null; mouse.y = null; });
+
     class Particle { constructor() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height; this.size = Math.random()*2+1; this.baseX = this.x; this.baseY = this.y; this.density = (Math.random()*30)+1; } draw() { ctx.fillStyle = document.body.classList.contains('ruslan-mode') ? '#00ff41' : '#007bff'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.closePath(); ctx.fill(); } update() { let dx = mouse.x - this.x; let dy = mouse.y - this.y; let distance = Math.sqrt(dx*dx + dy*dy); let forceDirectionX = dx/distance; let forceDirectionY = dy/distance; let force = (mouse.radius - distance) / mouse.radius; if (distance < mouse.radius) { this.x -= forceDirectionX * force * this.density; this.y -= forceDirectionY * force * this.density; } else { if(this.x !== this.baseX) this.x -= (this.x - this.baseX)/10; if(this.y !== this.baseY) this.y -= (this.y - this.baseY)/10; } } }
     function initParticles() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; for (let i = 0; i < 100; i++) particles.push(new Particle()); }
     function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); for (let i = 0; i < particles.length; i++) { particles[i].draw(); particles[i].update(); } for(let a=0; a<particles.length; a++) for(let b=a; b<particles.length; b++) { let dx = particles[a].x - particles[b].x; let dy = particles[a].y - particles[b].y; if(Math.sqrt(dx*dx + dy*dy) < 150) { ctx.strokeStyle = document.body.classList.contains('ruslan-mode') ? 'rgba(0,255,65,0.1)' : 'rgba(0,123,255,0.1)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(particles[a].x, particles[a].y); ctx.lineTo(particles[b].x, particles[b].y); ctx.stroke(); } } requestAnimationFrame(animate); }
@@ -675,4 +720,5 @@
 </script>
 </body>
 </html>
+
 
